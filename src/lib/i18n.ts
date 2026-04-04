@@ -45,6 +45,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     bright: "مبين",
     aspectRatio: "حجم الفيديو",
     fontStyle: "نوع الخط",
+    previewVoice: "معاينة الصوت",
+    randomize: "اختيار عشوائي",
+    stopPreview: "إيقاف المعاينة",
   },
   en: {
     appTitle: "Quran Video Generator",
@@ -90,6 +93,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     bright: "Bright",
     aspectRatio: "Video Size",
     fontStyle: "Font Style",
+    previewVoice: "Preview voice",
+    randomize: "Randomize",
+    stopPreview: "Stop preview",
   },
 };
 
