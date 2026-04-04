@@ -85,6 +85,16 @@ export default function Home() {
   const [error, setError] = useState("");
   const [dataLoading, setDataLoading] = useState(true);
 
+  // Load saved language preference on mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") as Lang | null;
+    if (savedLang && (savedLang === "ar" || savedLang === "en")) {
+      setLang(savedLang);
+      document.documentElement.lang = savedLang;
+      document.documentElement.dir = savedLang === "ar" ? "rtl" : "ltr";
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -115,6 +125,7 @@ export default function Home() {
 
   const handleLangChange = useCallback((newLang: Lang) => {
     setLang(newLang);
+    localStorage.setItem("lang", newLang);
     document.documentElement.lang = newLang;
     document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
   }, []);
