@@ -204,9 +204,9 @@ export default function Home() {
 
   return (
     /* ── 3-column grid ── */
-    <div className="flex flex-col min-h-dvh lg:grid lg:grid-cols-[380px_1fr_400px] xl:grid-cols-[420px_1fr_440px] 2xl:grid-cols-[460px_1fr_480px] bg-background">
+    <div className="h-dvh lg:grid lg:grid-cols-[380px_1fr_400px] xl:grid-cols-[420px_1fr_440px] 2xl:grid-cols-[460px_1fr_480px] bg-background">
       {/* ══ LEFT PANEL ══ */}
-      <aside className="flex flex-col bg-sidebar border-b lg:border-b-0 lg:border-e border-sidebar-border">
+      <aside className="flex flex-col h-dvh bg-sidebar border-b lg:border-b-0 lg:border-e border-sidebar-border">
         {/* Header */}
         <header className="flex items-center justify-between px-5 py-3 border-b border-sidebar-border shrink-0 h-14">
           <div className="flex items-center gap-2.5">
@@ -224,7 +224,7 @@ export default function Home() {
         </header>
 
         {/* Scrollable content */}
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <div className="px-5 py-4 space-y-5">
             {/* Auto Mode */}
             <AutoMode enabled={autoMode} onChange={setAutoMode} lang={lang} />
@@ -274,10 +274,10 @@ export default function Home() {
               </>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
-        {/* Footer / Generate */}
-        <div className="px-5 py-4 border-t border-sidebar-border shrink-0">
+        {/* Footer / Generate - Sticky at bottom */}
+        <div className="px-5 py-4 border-t border-sidebar-border shrink-0 bg-sidebar">
           {error && (
             <div className="mb-3 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs text-center">
               {error}
@@ -295,7 +295,7 @@ export default function Home() {
       </aside>
 
       {/* ══ CENTER ══ */}
-      <main className="relative flex flex-col items-center justify-center p-8 bg-background min-h-[300px]">
+      <main className="relative flex flex-col items-center justify-center p-8 bg-background h-dvh overflow-y-auto">
         <div className="w-full max-w-2xl flex flex-col items-center gap-5">
           {videoUrl ? (
             <VideoPreview videoUrl={videoUrl} lang={lang} />
@@ -324,7 +324,7 @@ export default function Home() {
       </main>
 
       {/* ══ RIGHT PANEL ══ */}
-      <aside className="flex flex-col bg-sidebar border-t lg:border-t-0 lg:border-s border-sidebar-border">
+      <aside className="flex flex-col h-dvh bg-sidebar border-t lg:border-t-0 lg:border-s border-sidebar-border">
         {/* Header */}
         <header className="flex items-center gap-2.5 px-5 py-3 border-b border-sidebar-border shrink-0 h-14">
           <Palette className="size-4 text-[var(--gold-500)]" />
@@ -334,7 +334,7 @@ export default function Home() {
         </header>
 
         {/* Scrollable content */}
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <div className="px-5 py-4 space-y-5">
             {/* Theme */}
             {!autoMode && (
@@ -404,7 +404,7 @@ export default function Home() {
               />
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </aside>
     </div>
   );
