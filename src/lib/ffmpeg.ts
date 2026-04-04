@@ -303,7 +303,31 @@ function splitIntoLines(text: string, maxVisibleChars: number): string[] {
 /** Adaptive font size based on visible text length and video width */
 function getAdaptiveFontSize(text: string, w: number): number {
   const vLen = visibleLength(text);
-  const base = w >= 1280 ? 52 : w >= 720 ? 42 : 34;
+
+  // Scale base font size proportionally to video width
+  // 720p (1280px) = 52, 1080p (1920px) = 78, 4K (3840px) = 156
+  let base: number;
+  if (w >= 3840) {
+    // 4K
+    base = 156;
+  } else if (w >= 2560) {
+    // 1440p
+    base = 104;
+  } else if (w >= 1920) {
+    // 1080p
+    base = 78;
+  } else if (w >= 1280) {
+    // 720p
+    base = 52;
+  } else if (w >= 720) {
+    // SD
+    base = 42;
+  } else {
+    // Low res
+    base = 34;
+  }
+
+  // Adjust based on text length
   if (vLen < 30) return base;
   if (vLen < 60) return Math.round(base * 0.82);
   if (vLen < 100) return Math.round(base * 0.68);
