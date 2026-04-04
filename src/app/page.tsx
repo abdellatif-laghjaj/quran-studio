@@ -20,6 +20,7 @@ import ThemeSelector from "@/components/ThemeSelector";
 import TafsirToggle from "@/components/TafsirToggle";
 import AutoMode from "@/components/AutoMode";
 import VideoPreview from "@/components/VideoPreview";
+import VideoPreviewCanvas from "@/components/VideoPreviewCanvas";
 import GenerateButton from "@/components/GenerateButton";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import BrightnessControl from "@/components/BrightnessControl";
@@ -313,18 +314,24 @@ export default function Home() {
           {videoUrl ? (
             <VideoPreview videoUrl={videoUrl} lang={lang} />
           ) : (
-            <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border bg-card text-muted-foreground text-center p-8">
-              <Video className="size-14 text-primary opacity-50" />
-              <div>
+            <div className="w-full flex flex-col gap-4">
+              <div className="text-center">
                 <p className="text-lg font-medium text-foreground mb-1">
-                  {lang === "ar" ? "معاينة الفيديو" : "Video Preview"}
+                  {lang === "ar" ? "معاينة مباشرة" : "Live Preview"}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {lang === "ar"
-                    ? "اختر السورة والآيات ثم اضغط إنشاء"
-                    : "Select a surah and verses, then click Generate"}
+                    ? "شاهد كيف سيبدو الفيديو مع الإعدادات الحالية"
+                    : "See how your video will look with current settings"}
                 </p>
               </div>
+              <VideoPreviewCanvas
+                aspectRatio={aspectRatio}
+                fontFile={fontFile}
+                theme={theme}
+                dimOpacity={dimOpacity}
+                lang={lang}
+              />
             </div>
           )}
         </div>
