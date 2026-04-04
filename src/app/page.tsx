@@ -54,7 +54,7 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border">
-      <Icon className="size-4 text-[var(--gold-600)] dark:text-[var(--gold-500)] shrink-0" />
+      <Icon className="size-4 text-primary shrink-0" />
       <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
@@ -194,7 +194,7 @@ export default function Home() {
   if (dataLoading) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background">
-        <p className="font-arabic text-2xl md:text-4xl bg-gradient-to-r from-[var(--gold-500)] to-[var(--gold-700)] bg-clip-text text-transparent animate-fade-in-up">
+        <p className="font-arabic text-2xl md:text-4xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in-up">
           بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
         </p>
         <div className="loading-spinner" />
@@ -210,10 +210,10 @@ export default function Home() {
         {/* Header */}
         <header className="flex items-center justify-between px-5 py-3 border-b border-sidebar-border shrink-0 h-14">
           <div className="flex items-center gap-2.5">
-            <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-[var(--gold-500)] to-[var(--gold-700)]">
-              <BookMarked className="size-4 text-[var(--gold-900)]" />
+            <div className="size-8 flex items-center justify-center rounded-lg bg-primary">
+              <BookMarked className="size-4 text-primary-foreground" />
             </div>
-            <h1 className="font-arabic text-lg font-bold bg-gradient-to-r from-[var(--gold-600)] to-[var(--gold-800)] dark:from-[var(--gold-300)] dark:to-[var(--gold-500)] bg-clip-text text-transparent">
+            <h1 className="font-arabic text-lg font-bold bg-gradient-to-r from-primary to-primary/70 dark:from-primary dark:to-primary/80 bg-clip-text text-transparent">
               {t(lang, "appTitle")}
             </h1>
           </div>
@@ -301,7 +301,7 @@ export default function Home() {
             <VideoPreview videoUrl={videoUrl} lang={lang} />
           ) : (
             <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border bg-card text-muted-foreground text-center p-8">
-              <Video className="size-14 text-[var(--gold-500)] opacity-50" />
+              <Video className="size-14 text-primary opacity-50" />
               <div>
                 <p className="text-lg font-medium text-foreground mb-1">
                   {lang === "ar" ? "معاينة الفيديو" : "Video Preview"}
@@ -327,7 +327,7 @@ export default function Home() {
       <aside className="flex flex-col h-dvh bg-sidebar border-t lg:border-t-0 lg:border-s border-sidebar-border">
         {/* Header */}
         <header className="flex items-center gap-2.5 px-5 py-3 border-b border-sidebar-border shrink-0 h-14">
-          <Palette className="size-4 text-[var(--gold-500)]" />
+          <Palette className="size-4 text-primary" />
           <span className="text-sm font-semibold text-foreground">
             {lang === "ar" ? "التصميم" : "Design"}
           </span>

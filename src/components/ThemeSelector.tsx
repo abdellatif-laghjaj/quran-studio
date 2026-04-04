@@ -39,8 +39,8 @@ export default function ThemeSelector({ selected, onChange, lang }: Props) {
               className={cn(
                 "flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg border text-[10px] font-medium transition-all",
                 active
-                  ? "border-[var(--gold-500)] bg-[var(--gold-500)]/10 text-foreground [&_svg]:text-[var(--gold-600)] dark:[&_svg]:text-[var(--gold-500)]"
-                  : "border-border bg-card text-muted-foreground hover:bg-accent hover:border-[var(--gold-600)]",
+                  ? "border-primary bg-primary/10 text-foreground [&_svg]:text-primary"
+                  : "border-border bg-card text-muted-foreground hover:bg-accent hover:border-primary",
               )}
             >
               <Icon className="size-4" />

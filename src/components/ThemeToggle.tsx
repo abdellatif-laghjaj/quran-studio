@@ -32,7 +32,7 @@ export default function ThemeToggle({
       variant="ghost"
       size="icon"
       onClick={toggle}
-      className={`size-8 rounded-lg border border-border bg-card hover:bg-accent hover:border-[var(--gold-500)] ${className}`}
+      className={`size-8 rounded-lg border border-border bg-card hover:bg-accent hover:border-primary ${className}`}
       aria-label={
         theme === "light" ? "Switch to dark mode" : "Switch to light mode"
       }

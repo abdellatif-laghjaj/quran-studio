@@ -10,18 +10,6 @@
    ═══════════════════════════════════════════════ */
 
 :root {
-  /* Gold spectrum */
-  --gold-50: #fdf8e8;
-  --gold-100: #f9edc4;
-  --gold-200: #f5e6a3;
-  --gold-300: #efd572;
-  --gold-400: #e8c84a;
-  --gold-500: #d4a843;
-  --gold-600: #b8922f;
-  --gold-700: #8c6e22;
-  --gold-800: #5c4915;
-  --gold-900: #2e240a;
-
   /* shadcn tokens — Light */
   --background: #fafafa;
   --foreground: #171717;
@@ -38,6 +26,7 @@
   --accent: #f5f5f5;
   --accent-foreground: #171717;
   --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
   --border: #e5e5e5;
   --input: #ffffff;
   --ring: #b8922f;
@@ -77,6 +66,7 @@
   --accent: #1c1c20;
   --accent-foreground: #fafafa;
   --destructive: #dc2626;
+  --destructive-foreground: #fafafa;
   --border: #27272a;
   --input: #18181b;
   --ring: #d4a843;
@@ -137,6 +127,7 @@ body {
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -151,16 +142,6 @@ body {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --color-gold-50: var(--gold-50);
-  --color-gold-100: var(--gold-100);
-  --color-gold-200: var(--gold-200);
-  --color-gold-300: var(--gold-300);
-  --color-gold-400: var(--gold-400);
-  --color-gold-500: var(--gold-500);
-  --color-gold-600: var(--gold-600);
-  --color-gold-700: var(--gold-700);
-  --color-gold-800: var(--gold-800);
-  --color-gold-900: var(--gold-900);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -194,7 +175,7 @@ body {
   width: 2.25rem;
   height: 2.25rem;
   border: 3px solid var(--border);
-  border-top-color: var(--gold-500);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

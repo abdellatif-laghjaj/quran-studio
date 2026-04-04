@@ -34,7 +34,7 @@ export default function TafsirToggle({ enabled, onChange, lang }: Props) {
         id="tafsir-toggle"
         checked={enabled}
         onCheckedChange={onChange}
-        className="data-[state=checked]:bg-[var(--gold-500)] shrink-0"
+        className="data-[state=checked]:bg-primary shrink-0"
       />
     </div>
   );

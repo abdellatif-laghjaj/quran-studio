@@ -130,7 +130,7 @@ export default function FontSelector({ selected, onChange, lang }: Props) {
             const catFonts = FONTS.filter((f) => f.category === cat);
             return (
               <div key={cat}>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--gold-600)] dark:text-[var(--gold-500)] mb-2 px-0.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-2 px-0.5">
                   {categoryLabels[cat][lang]}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -143,8 +143,8 @@ export default function FontSelector({ selected, onChange, lang }: Props) {
                         className={cn(
                           "flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg border text-center transition-all",
                           isSelected
-                            ? "border-[var(--gold-500)] bg-[var(--gold-500)]/10"
-                            : "border-border bg-card hover:bg-accent hover:border-[var(--gold-600)]",
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-card hover:bg-accent hover:border-primary",
                         )}
                       >
                         <span
@@ -158,7 +158,7 @@ export default function FontSelector({ selected, onChange, lang }: Props) {
                           className={cn(
                             "text-[10px] font-medium leading-none",
                             isSelected
-                              ? "text-[var(--gold-600)] dark:text-[var(--gold-500)] font-semibold"
+                              ? "text-primary font-semibold"
                               : "text-muted-foreground",
                           )}
                         >

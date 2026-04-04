@@ -14,10 +14,10 @@ export default function VideoPreview({ videoUrl, lang }: Props) {
   if (!videoUrl) return null;
 
   return (
-    <Card className="w-full animate-fade-in-up border-[var(--gold-500)]/30">
+    <Card className="w-full animate-fade-in-up border-primary/30">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base font-arabic">
-          <CheckCircle2 className="size-5 text-[var(--gold-500)]" />
+          <CheckCircle2 className="size-5 text-primary" />
           {t(lang, "videoReady")}
         </CardTitle>
       </CardHeader>
