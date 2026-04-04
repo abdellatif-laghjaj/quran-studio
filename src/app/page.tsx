@@ -25,6 +25,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import BrightnessControl from "@/components/BrightnessControl";
 import AspectRatioSelector from "@/components/AspectRatioSelector";
 import FontSelector from "@/components/FontSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Chapter {
   id: number;
@@ -201,7 +202,10 @@ export default function Home() {
             </div>
             <h1 className="playground-title">{t(lang, "appTitle")}</h1>
           </div>
-          <LanguageSwitcher lang={lang} onChange={handleLangChange} />
+          <div className="header-actions">
+            <ThemeToggle />
+            <LanguageSwitcher lang={lang} onChange={handleLangChange} />
+          </div>
         </header>
 
         {/* Scrollable Content */}
