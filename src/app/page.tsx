@@ -264,6 +264,7 @@ export default function Home() {
                     selected={selectedReciter}
                     onChange={setSelectedReciter}
                     lang={lang}
+                    chapter={selectedSurah}
                   />
                 </div>
               </>
