@@ -456,7 +456,7 @@ export async function generateVideo(
       const vnY = blockY + totalTextHeight + 10;
       textFilters.push(
         `drawtext=text='${vnText}':fontfile='${fontPath}':` +
-          `fontsize=${vnFS}:fontcolor=#D4AF37:${textStyle}:` +
+          `fontsize=${vnFS}:fontcolor=#b8922f:${textStyle}:` +
           `x=(w-text_w)/2:y=${vnY}:${enb}:${fad}${shaping}`,
       );
 
@@ -475,7 +475,7 @@ export async function generateVideo(
           const tText = prepareText(tafsirLines[tl]);
           textFilters.push(
             `drawtext=text='${tText}':fontfile='${fontPath}':` +
-              `fontsize=${tafsirFS}:fontcolor=#E8E8E8:${textStyle}:` +
+              `fontsize=${tafsirFS}:fontcolor=#fafafa:${textStyle}:` +
               `x=(w-text_w)/2:y=${tafsirY + tl * tafsirLineH}:${enb}:${fad}${shaping}`,
           );
         }
