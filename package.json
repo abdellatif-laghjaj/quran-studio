@@ -1,6 +1,7 @@
 {
-  "name": "zx",
+  "name": "quran-studio",
   "version": "0.1.0",
+  "description": "A Next.js web app that generates MP4 videos of Quranic verses with audio recitations and Arabic text overlays.",
   "private": true,
   "scripts": {
     "dev": "next dev --port 3034",
