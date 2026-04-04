@@ -2,8 +2,8 @@
 
 import { t, Lang } from "@/lib/i18n";
 import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Monitor, Smartphone, Square, RectangleVertical } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Ratio {
   id: string;
@@ -29,8 +29,8 @@ const RATIOS: Ratio[] = [
     id: "9:16",
     label: "9:16",
     icon: Smartphone,
-    desc: "Reels / Shorts",
-    descAr: "ريلز / شورتس",
+    desc: "Reels",
+    descAr: "ريلز",
     width: 720,
     height: 1280,
   },
@@ -66,37 +66,33 @@ export default function AspectRatioSelector({
   lang,
 }: Props) {
   return (
-    <div className="field-group">
-      <Label>{t(lang, "aspectRatio")}</Label>
-      <ToggleGroup
-        type="single"
-        value={selected}
-        onValueChange={(value) => {
-          if (value) {
-            const ratio = RATIOS.find((r) => r.id === value);
-            if (ratio) onChange(ratio.id, ratio.width, ratio.height);
-          }
-        }}
-        className="ratio-toggle-group"
-      >
+    <div className="flex flex-col gap-2">
+      <Label className="text-xs font-medium">{t(lang, "aspectRatio")}</Label>
+      <div className="grid grid-cols-4 gap-1.5">
         {RATIOS.map((r) => {
           const Icon = r.icon;
+          const active = selected === r.id;
           return (
-            <ToggleGroupItem
+            <button
               key={r.id}
-              value={r.id}
-              className="ratio-toggle-item"
-              aria-label={r.label}
+              onClick={() => onChange(r.id, r.width, r.height)}
+              aria-pressed={active}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg border text-[10px] font-medium transition-all",
+                active
+                  ? "border-[var(--gold-500)] bg-[var(--gold-500)]/10 text-foreground [&_svg]:text-[var(--gold-600)] dark:[&_svg]:text-[var(--gold-500)]"
+                  : "border-border bg-card text-muted-foreground hover:bg-accent hover:border-[var(--gold-600)]",
+              )}
             >
-              <Icon className="size-5" />
-              <span className="font-semibold">{r.label}</span>
-              <span className="text-muted-foreground text-[10px]">
+              <Icon className="size-4" />
+              <span className="font-semibold text-[11px]">{r.label}</span>
+              <span className="text-muted-foreground text-[9px] truncate w-full text-center">
                 {lang === "ar" ? r.descAr : r.desc}
               </span>
-            </ToggleGroupItem>
+            </button>
           );
         })}
-      </ToggleGroup>
+      </div>
     </div>
   );
 }

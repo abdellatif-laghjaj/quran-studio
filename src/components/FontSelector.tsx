@@ -120,44 +120,58 @@ export default function FontSelector({ selected, onChange, lang }: Props) {
   const categories = ["naskh", "ruqaa", "modern"] as const;
 
   return (
-    <div className="field-group">
+    <div className="flex flex-col gap-2">
       <style dangerouslySetInnerHTML={{ __html: fontFaceCSS }} />
-      <Label>{t(lang, "fontStyle")}</Label>
+      <Label className="text-xs font-medium">{t(lang, "fontStyle")}</Label>
 
-      <ScrollArea className="h-[300px] rounded-md border border-border p-3">
-        {categories.map((cat) => {
-          const catFonts = FONTS.filter((f) => f.category === cat);
-          return (
-            <div key={cat} className="mb-4 last:mb-0">
-              <div className="text-[10px] font-semibold text-gold-500 uppercase tracking-wider mb-2 px-1">
-                {categoryLabels[cat][lang]}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                {catFonts.map((font) => {
-                  const isSelected = selected === font.file;
-                  return (
-                    <button
-                      key={font.id}
-                      onClick={() => onChange(font.file)}
-                      className={cn("font-card", isSelected && "selected")}
-                    >
-                      <span
-                        className="font-card-preview"
-                        style={{ fontFamily: `'${font.fontFamily}', serif` }}
+      <ScrollArea className="h-72 rounded-lg border border-border">
+        <div className="p-3 space-y-4">
+          {categories.map((cat) => {
+            const catFonts = FONTS.filter((f) => f.category === cat);
+            return (
+              <div key={cat}>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--gold-600)] dark:text-[var(--gold-500)] mb-2 px-0.5">
+                  {categoryLabels[cat][lang]}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {catFonts.map((font) => {
+                    const isSelected = selected === font.file;
+                    return (
+                      <button
+                        key={font.id}
+                        onClick={() => onChange(font.file)}
+                        className={cn(
+                          "flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg border text-center transition-all",
+                          isSelected
+                            ? "border-[var(--gold-500)] bg-[var(--gold-500)]/10"
+                            : "border-border bg-card hover:bg-accent hover:border-[var(--gold-600)]",
+                        )}
                       >
-                        بِسْمِ ٱللَّهِ
-                      </span>
-                      <span className="font-card-name">
-                        {lang === "ar" ? font.nameAr : font.name}
-                      </span>
-                    </button>
-                  );
-                })}
+                        <span
+                          className="text-lg leading-snug text-foreground"
+                          style={{ fontFamily: `'${font.fontFamily}', serif` }}
+                          dir="rtl"
+                        >
+                          بِسْمِ ٱللَّهِ
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[10px] font-medium leading-none",
+                            isSelected
+                              ? "text-[var(--gold-600)] dark:text-[var(--gold-500)] font-semibold"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          {lang === "ar" ? font.nameAr : font.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </ScrollArea>
     </div>
   );

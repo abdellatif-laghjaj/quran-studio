@@ -13,17 +13,34 @@ interface Props {
 
 export default function AutoMode({ enabled, onChange, lang }: Props) {
   return (
-    <div className={`switch-row ${enabled ? "highlighted" : ""}`}>
-      <div className="flex items-center gap-3">
-        <Sparkles className="size-4 text-gold-500" />
-        <div className="switch-info">
-          <Label htmlFor="auto-mode" className="switch-label">
+    <div
+      className={[
+        "flex items-center justify-between gap-3 px-4 py-3 rounded-xl border transition-colors",
+        enabled
+          ? "bg-[var(--gold-500)]/10 border-[var(--gold-500)]/40"
+          : "bg-card border-border",
+      ].join(" ")}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <Sparkles className="size-4 text-[var(--gold-500)] shrink-0" />
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <Label
+            htmlFor="auto-mode"
+            className="text-sm font-semibold cursor-pointer"
+          >
             {t(lang, "autoMode")}
           </Label>
-          <span className="switch-description">{t(lang, "autoModeDesc")}</span>
+          <span className="text-xs text-muted-foreground leading-snug">
+            {t(lang, "autoModeDesc")}
+          </span>
         </div>
       </div>
-      <Switch id="auto-mode" checked={enabled} onCheckedChange={onChange} />
+      <Switch
+        id="auto-mode"
+        checked={enabled}
+        onCheckedChange={onChange}
+        className="data-[state=checked]:bg-[var(--gold-500)] shrink-0"
+      />
     </div>
   );
 }
