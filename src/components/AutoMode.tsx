@@ -1,6 +1,9 @@
 "use client";
 
 import { Lang, t } from "@/lib/i18n";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Sparkles } from "lucide-react";
 
 interface Props {
   enabled: boolean;
@@ -10,47 +13,17 @@ interface Props {
 
 export default function AutoMode({ enabled, onChange, lang }: Props) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "16px",
-        padding: "16px 20px",
-        background: enabled ? "rgba(212, 175, 55, 0.08)" : "transparent",
-        borderRadius: "12px",
-        border: `1px solid ${enabled ? "rgba(212, 175, 55, 0.3)" : "var(--border)"}`,
-        transition: "all 0.3s ease",
-      }}
-    >
-      <div>
-        <span
-          style={{
-            fontWeight: 600,
-            color: enabled ? "var(--gold)" : "var(--text-primary)",
-            fontSize: "15px",
-          }}
-        >
-          ✨ {t(lang, "autoMode")}
-        </span>
-        <span
-          style={{
-            display: "block",
-            fontSize: "13px",
-            color: "var(--text-muted)",
-            marginTop: "4px",
-          }}
-        >
-          {t(lang, "autoModeDesc")}
-        </span>
+    <div className={`switch-row ${enabled ? "highlighted" : ""}`}>
+      <div className="flex items-center gap-3">
+        <Sparkles className="size-4 text-gold-500" />
+        <div className="switch-info">
+          <Label htmlFor="auto-mode" className="switch-label">
+            {t(lang, "autoMode")}
+          </Label>
+          <span className="switch-description">{t(lang, "autoModeDesc")}</span>
+        </div>
       </div>
-      <div
-        className={`toggle-switch ${enabled ? "active" : ""}`}
-        onClick={() => onChange(!enabled)}
-        role="switch"
-        aria-checked={enabled}
-        id="auto-mode-toggle"
-      />
+      <Switch id="auto-mode" checked={enabled} onCheckedChange={onChange} />
     </div>
   );
 }

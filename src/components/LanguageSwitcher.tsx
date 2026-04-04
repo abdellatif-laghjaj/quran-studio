@@ -1,6 +1,8 @@
 "use client";
 
 import { Lang } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Languages } from "lucide-react";
 
 interface Props {
   lang: Lang;
@@ -9,17 +11,14 @@ interface Props {
 
 export default function LanguageSwitcher({ lang, onChange }: Props) {
   return (
-    <button
-      className="btn-secondary"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={() => onChange(lang === "ar" ? "en" : "ar")}
-      id="language-switcher"
-      style={{
-        padding: "8px 16px",
-        fontSize: "14px",
-        borderRadius: "8px",
-      }}
+      className="gap-2"
     >
-      {lang === "ar" ? "🇬🇧 English" : "🇸🇦 العربية"}
-    </button>
+      <Languages data-icon="inline-start" />
+      {lang === "ar" ? "English" : "العربية"}
+    </Button>
   );
 }

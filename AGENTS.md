@@ -41,17 +41,17 @@ quran-studio/
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16.2 (App Router) |
-| Language | TypeScript 6 |
-| Styling | Tailwind CSS v4 + custom CSS variables |
-| React | React 19 |
-| Video encoding | FFmpeg via `fluent-ffmpeg`; `@ffmpeg-installer/ffmpeg` for local dev, system `ffmpeg` in Docker |
-| HTTP client | Axios |
-| IDs | `uuid` v13 |
-| Arabic text | `arabic-reshaper` + libass (in FFmpeg) |
-| Package manager | npm (canonical lock file: `package-lock.json`); `bun.lock` also present |
+| Layer           | Technology                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| Framework       | Next.js 16.2 (App Router)                                                                       |
+| Language        | TypeScript 6                                                                                    |
+| Styling         | Tailwind CSS v4 + custom CSS variables                                                          |
+| React           | React 19                                                                                        |
+| Video encoding  | FFmpeg via `fluent-ffmpeg`; `@ffmpeg-installer/ffmpeg` for local dev, system `ffmpeg` in Docker |
+| HTTP client     | Axios                                                                                           |
+| IDs             | `uuid` v13                                                                                      |
+| Arabic text     | `arabic-reshaper` + libass (in FFmpeg)                                                          |
+| Package manager | npm (canonical lock file: `package-lock.json`); `bun.lock` also present                         |
 
 ---
 
@@ -75,8 +75,8 @@ bun run format       # Prettier
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|---|---|---|
+| Variable          | Required   | Description                                                                                                                     |
+| ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `PIXABAY_API_KEY` | Yes (prod) | Pixabay API key for background video search. A fallback key is hard-coded for development only — replace it for production use. |
 
 Set this in a `.env.local` file for local development:
@@ -145,20 +145,20 @@ Returns `{ reciters: Reciter[] }` from Quran.com.
 
 All components are controlled (props in, callback out) and accept a `lang: "ar" | "en"` prop for bilingual rendering.
 
-| Component | Purpose |
-|---|---|
-| `SurahSelector` | Dropdown to pick a Surah (114 chapters) |
-| `AyahRangePicker` | Start/end ayah number inputs, bounded by chapter length |
-| `ReciterSelector` | Dropdown to pick a reciter |
-| `ThemeSelector` | Button group for background theme |
-| `BrightnessControl` | Slider for `dimOpacity` (0–100 mapped to 0.0–1.0) |
-| `AspectRatioSelector` | Picks video dimensions (16:9, 9:16, 1:1, etc.) |
-| `FontSelector` | Picks Arabic font (TTF files from `public/fonts/`) |
-| `TafsirToggle` | Checkbox to include tafsir overlay |
-| `AutoMode` | Toggle that randomises reciter + theme on each Surah change |
-| `GenerateButton` | Submit button with progress bar and status text |
-| `VideoPreview` | Renders the returned blob URL in a `<video>` element with a download link |
-| `LanguageSwitcher` | Toggles `lang` state; also sets `document.documentElement.lang` and `dir` |
+| Component             | Purpose                                                                   |
+| --------------------- | ------------------------------------------------------------------------- |
+| `SurahSelector`       | Dropdown to pick a Surah (114 chapters)                                   |
+| `AyahRangePicker`     | Start/end ayah number inputs, bounded by chapter length                   |
+| `ReciterSelector`     | Dropdown to pick a reciter                                                |
+| `ThemeSelector`       | Button group for background theme                                         |
+| `BrightnessControl`   | Slider for `dimOpacity` (0–100 mapped to 0.0–1.0)                         |
+| `AspectRatioSelector` | Picks video dimensions (16:9, 9:16, 1:1, etc.)                            |
+| `FontSelector`        | Picks Arabic font (TTF files from `public/fonts/`)                        |
+| `TafsirToggle`        | Checkbox to include tafsir overlay                                        |
+| `AutoMode`            | Toggle that randomises reciter + theme on each Surah change               |
+| `GenerateButton`      | Submit button with progress bar and status text                           |
+| `VideoPreview`        | Renders the returned blob URL in a `<video>` element with a download link |
+| `LanguageSwitcher`    | Toggles `lang` state; also sets `document.documentElement.lang` and `dir` |
 
 ---
 

@@ -2,6 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Lang, t } from "@/lib/i18n";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  BookOpen,
+  Palette,
+  Settings,
+  Video,
+  BookMarked,
+  Mic,
+} from "lucide-react";
+
 import SurahSelector from "@/components/SurahSelector";
 import ReciterSelector from "@/components/ReciterSelector";
 import AyahRangePicker from "@/components/AyahRangePicker";
@@ -14,6 +25,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import BrightnessControl from "@/components/BrightnessControl";
 import AspectRatioSelector from "@/components/AspectRatioSelector";
 import FontSelector from "@/components/FontSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Chapter {
   id: number;
@@ -158,8 +170,9 @@ export default function Home() {
       setVideoUrl(url);
       setProgress(100);
       setStatusText(t(lang, "videoReady"));
-    } catch (e: any) {
-      setError(e.message || t(lang, "error"));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : t(lang, "error");
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -172,205 +185,99 @@ export default function Home() {
         <div className="loading-bismillah font-arabic">
           بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
         </div>
-        <div className="loading-ring" />
+        <div className="loading-spinner" />
       </div>
     );
   }
 
   return (
-    <>
-      {/* Ambient backgrounds */}
-      <div className="bg-ambient" />
-      <div className="bg-pattern" />
-
-      <main className="app-shell">
-        {/* ══════ HERO ══════ */}
-        <header className="hero anim-in">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: "28px",
-            }}
-          >
+    <div className="playground">
+      {/* ══════ LEFT PANEL — Quran Selection ══════ */}
+      <aside className="playground-panel playground-panel-left">
+        {/* Header */}
+        <header className="playground-header">
+          <div className="playground-logo">
+            <div className="playground-logo-icon">
+              <BookMarked className="size-4" />
+            </div>
+            <h1 className="playground-title">{t(lang, "appTitle")}</h1>
+          </div>
+          <div className="header-actions">
+            <ThemeToggle />
             <LanguageSwitcher lang={lang} onChange={handleLangChange} />
           </div>
-
-          <div className="hero-ornament">
-            <div className="hero-ornament-line" />
-            <div className="hero-ornament-dot" />
-            <div
-              className="hero-ornament-line"
-              style={{ transform: "scaleX(-1)" }}
-            />
-          </div>
-
-          <h1 className="hero-title font-arabic">{t(lang, "appTitle")}</h1>
-          <p className="hero-subtitle">{t(lang, "appSubtitle")}</p>
-          <div className="hero-underline" />
         </header>
 
-        {/* ══════ AUTO MODE ══════ */}
-        <div className="panel anim-in d1">
-          <AutoMode enabled={autoMode} onChange={setAutoMode} lang={lang} />
-        </div>
+        {/* Scrollable Content */}
+        <ScrollArea className="flex-1">
+          <div className="panel-content">
+            {/* Auto Mode */}
+            <div className="panel-section">
+              <AutoMode enabled={autoMode} onChange={setAutoMode} lang={lang} />
+            </div>
 
-        {/* ══════ PANEL 1: QURAN SELECTION ══════ */}
-        <div className="panel anim-in d2">
-          <div className="panel-header">
-            <div className="panel-icon">📖</div>
-            <div>
-              <div className="panel-title">
-                {lang === "ar"
-                  ? "اختيار السورة والآيات"
-                  : "Surah & Ayah Selection"}
+            <Separator className="my-3" />
+
+            {/* Surah Selection */}
+            <div className="panel-section">
+              <div className="panel-section-header">
+                <BookOpen className="panel-section-icon" />
+                <span className="panel-section-title">
+                  {lang === "ar" ? "السورة" : "Surah"}
+                </span>
               </div>
-              <div className="panel-desc">
-                {lang === "ar"
-                  ? "حدد السورة ونطاق الآيات المطلوبة"
-                  : "Pick a surah and set the verse range"}
+
+              <div className="flex flex-col gap-3">
+                <SurahSelector
+                  chapters={chapters}
+                  selected={selectedSurah}
+                  onChange={setSelectedSurah}
+                  lang={lang}
+                />
+
+                <AyahRangePicker
+                  maxVerses={maxVerses}
+                  startAyah={startAyah}
+                  endAyah={endAyah}
+                  onStartChange={setStartAyah}
+                  onEndChange={setEndAyah}
+                  lang={lang}
+                />
               </div>
             </div>
+
+            {!autoMode && (
+              <>
+                <Separator className="my-3" />
+
+                {/* Reciter Selection */}
+                <div className="panel-section">
+                  <div className="panel-section-header">
+                    <Mic className="panel-section-icon" />
+                    <span className="panel-section-title">
+                      {lang === "ar" ? "القارئ" : "Reciter"}
+                    </span>
+                  </div>
+
+                  <ReciterSelector
+                    reciters={reciters}
+                    selected={selectedReciter}
+                    onChange={setSelectedReciter}
+                    lang={lang}
+                  />
+                </div>
+              </>
+            )}
           </div>
+        </ScrollArea>
 
-          <SurahSelector
-            chapters={chapters}
-            selected={selectedSurah}
-            onChange={setSelectedSurah}
-            lang={lang}
-          />
-
-          <div className="panel-divider" />
-
-          <AyahRangePicker
-            maxVerses={maxVerses}
-            startAyah={startAyah}
-            endAyah={endAyah}
-            onStartChange={setStartAyah}
-            onEndChange={setEndAyah}
-            lang={lang}
-          />
-
-          {!autoMode && (
-            <>
-              <div className="panel-divider" />
-              <ReciterSelector
-                reciters={reciters}
-                selected={selectedReciter}
-                onChange={setSelectedReciter}
-                lang={lang}
-              />
-            </>
-          )}
-        </div>
-
-        {/* ══════ PANEL 2: VISUAL DESIGN ══════ */}
-        <div className="panel anim-in d3">
-          <div className="panel-header">
-            <div className="panel-icon">🎨</div>
-            <div>
-              <div className="panel-title">
-                {lang === "ar" ? "التصميم المرئي" : "Visual Design"}
-              </div>
-              <div className="panel-desc">
-                {lang === "ar"
-                  ? "الخلفية والسطوع والأبعاد والخط"
-                  : "Theme, brightness, aspect ratio & font"}
-              </div>
-            </div>
-          </div>
-
-          {!autoMode && (
-            <>
-              <ThemeSelector selected={theme} onChange={setTheme} lang={lang} />
-              <div className="panel-divider" />
-            </>
-          )}
-
-          <BrightnessControl
-            value={dimOpacity}
-            onChange={setDimOpacity}
-            lang={lang}
-          />
-
-          <div className="panel-divider" />
-
-          <div className="grid-2">
-            <AspectRatioSelector
-              selected={aspectRatio}
-              onChange={(id, w, h) => {
-                setAspectRatio(id);
-                setVideoWidth(w);
-                setVideoHeight(h);
-              }}
-              lang={lang}
-            />
-            <FontSelector
-              selected={fontFile}
-              onChange={setFontFile}
-              lang={lang}
-            />
-          </div>
-        </div>
-
-        {/* ══════ PANEL 3: EXTRAS ══════ */}
-        <div className="panel anim-in d4">
-          <div className="panel-header">
-            <div className="panel-icon">⚙️</div>
-            <div>
-              <div className="panel-title">
-                {lang === "ar" ? "خيارات إضافية" : "Extra Options"}
-              </div>
-            </div>
-          </div>
-          <TafsirToggle
-            enabled={includeTafsir}
-            onChange={setIncludeTafsir}
-            lang={lang}
-          />
-        </div>
-
-        {/* ══════ ERROR ══════ */}
-        {error && (
-          <div
-            className="panel fade-in"
-            style={{
-              borderColor: "rgba(239,83,80,0.25)",
-              background: "rgba(239,83,80,0.04)",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{
-                color: "#ef5350",
-                fontWeight: 600,
-                fontSize: "15px",
-                marginBottom: "14px",
-              }}
-            >
+        {/* Footer with Generate Button */}
+        <div className="panel-footer">
+          {error && (
+            <div className="mb-3 p-2 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-xs text-center">
               {error}
-            </p>
-            <button
-              onClick={() => setError("")}
-              style={{
-                padding: "8px 24px",
-                background: "transparent",
-                border: "1px solid rgba(239,83,80,0.3)",
-                color: "#ef5350",
-                borderRadius: "var(--r-sm)",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "13px",
-                fontWeight: 600,
-              }}
-            >
-              {t(lang, "tryAgain")}
-            </button>
-          </div>
-        )}
-
-        {/* ══════ GENERATE ══════ */}
-        <div className="anim-in d5">
+            </div>
+          )}
           <GenerateButton
             loading={loading}
             progress={progress}
@@ -380,19 +287,135 @@ export default function Home() {
             lang={lang}
           />
         </div>
+      </aside>
 
-        {/* ══════ VIDEO PREVIEW ══════ */}
-        <VideoPreview videoUrl={videoUrl} lang={lang} />
+      {/* ══════ CENTER — Video Preview ══════ */}
+      <main className="playground-main">
+        <div className="preview-container">
+          {videoUrl ? (
+            <VideoPreview videoUrl={videoUrl} lang={lang} />
+          ) : (
+            <div className="preview-placeholder">
+              <Video className="preview-placeholder-icon" />
+              <div>
+                <p className="text-lg font-medium text-foreground mb-1">
+                  {lang === "ar" ? "معاينة الفيديو" : "Video Preview"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {lang === "ar"
+                    ? "اختر السورة والآيات ثم اضغط إنشاء"
+                    : "Select a surah and verses, then click Generate"}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
-        {/* ══════ FOOTER ══════ */}
-        <footer className="app-footer">
-          <p>
-            {lang === "ar"
-              ? "مُولِّد فيديو القرآن — بيانات من Quran.com | فيديوهات من Pixabay"
-              : "Quran Video Generator — Data from Quran.com | Videos from Pixabay"}
-          </p>
-        </footer>
+        {/* Footer Attribution */}
+        <div className="absolute bottom-4 left-0 right-0 text-center text-xs text-muted-foreground">
+          {lang === "ar"
+            ? "بيانات من Quran.com | فيديوهات من Pixabay"
+            : "Data from Quran.com | Videos from Pixabay"}
+        </div>
       </main>
-    </>
+
+      {/* ══════ RIGHT PANEL — Visual Design & Options ══════ */}
+      <aside className="playground-panel playground-panel-right">
+        {/* Header */}
+        <header className="playground-header">
+          <div className="playground-logo">
+            <Palette className="size-4 text-gold-500" />
+            <span className="text-sm font-medium text-foreground">
+              {lang === "ar" ? "التصميم" : "Design"}
+            </span>
+          </div>
+        </header>
+
+        {/* Scrollable Content */}
+        <ScrollArea className="flex-1">
+          <div className="panel-content">
+            {/* Theme */}
+            {!autoMode && (
+              <div className="panel-section">
+                <div className="panel-section-header">
+                  <Palette className="panel-section-icon" />
+                  <span className="panel-section-title">
+                    {lang === "ar" ? "الخلفية" : "Background"}
+                  </span>
+                </div>
+
+                <ThemeSelector
+                  selected={theme}
+                  onChange={setTheme}
+                  lang={lang}
+                />
+              </div>
+            )}
+
+            {!autoMode && <Separator className="my-3" />}
+
+            {/* Brightness */}
+            <div className="panel-section">
+              <BrightnessControl
+                value={dimOpacity}
+                onChange={setDimOpacity}
+                lang={lang}
+              />
+            </div>
+
+            <Separator className="my-3" />
+
+            {/* Aspect Ratio */}
+            <div className="panel-section">
+              <div className="panel-section-header">
+                <Video className="panel-section-icon" />
+                <span className="panel-section-title">
+                  {lang === "ar" ? "الأبعاد" : "Aspect Ratio"}
+                </span>
+              </div>
+
+              <AspectRatioSelector
+                selected={aspectRatio}
+                onChange={(id, w, h) => {
+                  setAspectRatio(id);
+                  setVideoWidth(w);
+                  setVideoHeight(h);
+                }}
+                lang={lang}
+              />
+            </div>
+
+            <Separator className="my-3" />
+
+            {/* Font */}
+            <div className="panel-section">
+              <FontSelector
+                selected={fontFile}
+                onChange={setFontFile}
+                lang={lang}
+              />
+            </div>
+
+            <Separator className="my-3" />
+
+            {/* Extra Options */}
+            <div className="panel-section">
+              <div className="panel-section-header">
+                <Settings className="panel-section-icon" />
+                <span className="panel-section-title">
+                  {lang === "ar" ? "خيارات" : "Options"}
+                </span>
+              </div>
+
+              <TafsirToggle
+                enabled={includeTafsir}
+                onChange={setIncludeTafsir}
+                lang={lang}
+              />
+            </div>
+          </div>
+        </ScrollArea>
+      </aside>
+    </div>
   );
 }

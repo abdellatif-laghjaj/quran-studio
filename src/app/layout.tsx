@@ -3,7 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Quran Video Generator | مُولِّد فيديو القرآن",
@@ -27,7 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
+    <html
+      lang="ar"
+      dir="rtl"
+      suppressHydrationWarning
+      className={cn("font-sans", inter.variable)}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

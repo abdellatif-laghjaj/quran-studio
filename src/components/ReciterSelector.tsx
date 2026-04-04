@@ -1,6 +1,15 @@
 "use client";
 
 import { Lang, t } from "@/lib/i18n";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface Reciter {
   id: number;
@@ -21,22 +30,36 @@ export default function ReciterSelector({
   onChange,
   lang,
 }: Props) {
+  const selectedReciter = reciters.find((r) => r.id === selected);
+
   return (
-    <div>
-      <label className="form-label">{t(lang, "selectReciter")}</label>
-      <select
-        className="input-field"
-        value={selected}
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        id="reciter-selector"
+    <div className="field-group">
+      <Label htmlFor="reciter-selector">{t(lang, "selectReciter")}</Label>
+      <Select
+        value={selected.toString()}
+        onValueChange={(val) => onChange(parseInt(val))}
       >
-        {reciters.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.reciter_name}
-            {r.style ? ` (${r.style})` : ""}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger id="reciter-selector">
+          <SelectValue>
+            {selectedReciter && (
+              <span>
+                {selectedReciter.reciter_name}
+                {selectedReciter.style ? ` (${selectedReciter.style})` : ""}
+              </span>
+            )}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent className="max-h-80">
+          <SelectGroup>
+            {reciters.map((r) => (
+              <SelectItem key={r.id} value={r.id.toString()}>
+                {r.reciter_name}
+                {r.style ? ` (${r.style})` : ""}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
