@@ -24,6 +24,7 @@ import GenerateButton from "@/components/GenerateButton";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import BrightnessControl from "@/components/BrightnessControl";
 import AspectRatioSelector from "@/components/AspectRatioSelector";
+import VideoQualitySelector from "@/components/VideoQualitySelector";
 import FontSelector from "@/components/FontSelector";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -75,6 +76,7 @@ export default function Home() {
   const [autoMode, setAutoMode] = useState(false);
   const [dimOpacity, setDimOpacity] = useState(55);
   const [aspectRatio, setAspectRatio] = useState("16:9");
+  const [videoQuality, setVideoQuality] = useState("720p");
   const [videoWidth, setVideoWidth] = useState(1280);
   const [videoHeight, setVideoHeight] = useState(720);
   const [fontFile, setFontFile] = useState("Amiri.ttf");
@@ -390,6 +392,20 @@ export default function Home() {
                 lang={lang}
               />
             </div>
+
+            <Separator />
+
+            {/* Video Quality */}
+            <VideoQualitySelector
+              selected={videoQuality}
+              aspectRatio={aspectRatio}
+              onChange={(id, w, h) => {
+                setVideoQuality(id);
+                setVideoWidth(w);
+                setVideoHeight(h);
+              }}
+              lang={lang}
+            />
 
             <Separator />
 

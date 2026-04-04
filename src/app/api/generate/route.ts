@@ -56,9 +56,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Cap resolution to avoid OOM on 512MB server
-    const safeWidth = Math.min(videoWidth, 854);
-    const safeHeight = Math.min(videoHeight, 480);
+    // Use requested resolution
+    const safeWidth = videoWidth;
+    const safeHeight = videoHeight;
 
     // 1) Fetch verses
     console.log("[GEN] Step 1: fetching verses...");
