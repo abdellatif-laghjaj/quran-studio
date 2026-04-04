@@ -14,23 +14,22 @@ export default function VideoPreview({ videoUrl, lang }: Props) {
   if (!videoUrl) return null;
 
   return (
-    <Card className="animate-slide-in border-gold-500/30 bg-card/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg font-arabic">
-          <CheckCircle2 className="size-5 text-gold-500" />
+    <Card className="w-full animate-fade-in-up border-primary/30">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base font-arabic">
+          <CheckCircle2 className="size-5 text-primary" />
           {t(lang, "videoReady")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="preview-video-container">
-          <video controls preload="metadata">
+        <div className="w-full rounded-lg overflow-hidden bg-black border border-border">
+          <video controls preload="metadata" className="w-full block">
             <source src={videoUrl} type="video/mp4" />
           </video>
         </div>
-
         <Button asChild className="w-full gap-2">
           <a href={videoUrl} download>
-            <Download data-icon="inline-start" />
+            <Download className="size-4 me-2" />
             {t(lang, "download")}
           </a>
         </Button>

@@ -33,15 +33,19 @@ export default function SurahSelector({
   lang,
 }: Props) {
   const selectedChapter = chapters.find((c) => c.id === selected);
-
   return (
-    <div className="field-group">
-      <Label htmlFor="surah-selector">{t(lang, "selectSurah")}</Label>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="surah-selector" className="text-xs font-medium">
+        {t(lang, "selectSurah")}
+      </Label>
       <Select
         value={selected.toString()}
         onValueChange={(val) => onChange(parseInt(val))}
       >
-        <SelectTrigger id="surah-selector" className="font-arabic">
+        <SelectTrigger
+          id="surah-selector"
+          className="h-9 w-full font-arabic text-sm"
+        >
           <SelectValue>
             {selectedChapter && (
               <span>
@@ -54,13 +58,13 @@ export default function SurahSelector({
             )}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="max-h-80">
+        <SelectContent className="max-h-72">
           <SelectGroup>
             {chapters.map((ch) => (
               <SelectItem
                 key={ch.id}
                 value={ch.id.toString()}
-                className="font-arabic"
+                className="font-arabic text-sm"
               >
                 {ch.id}. {lang === "ar" ? ch.name_arabic : ch.name_simple} —{" "}
                 {ch.verses_count} {t(lang, "verses")}

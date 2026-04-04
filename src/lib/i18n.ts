@@ -2,7 +2,7 @@ export type Lang = "ar" | "en";
 
 export const translations: Record<Lang, Record<string, string>> = {
   ar: {
-    appTitle: "مُولِّد فيديو القرآن",
+    appTitle: "استوديو القرآن",
     appSubtitle: "أنشئ فيديوهات قرآنية بتلاوات جميلة",
     selectSurah: "اختر السورة",
     selectReciter: "اختر القارئ",
@@ -50,7 +50,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     stopPreview: "إيقاف المعاينة",
   },
   en: {
-    appTitle: "Quran Video Generator",
+    appTitle: "Quran Studio",
     appSubtitle: "Create beautiful Quranic videos with recitations",
     selectSurah: "Select Surah",
     selectReciter: "Select Reciter",

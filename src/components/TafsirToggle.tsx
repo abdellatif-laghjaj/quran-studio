@@ -13,21 +13,29 @@ interface Props {
 
 export default function TafsirToggle({ enabled, onChange, lang }: Props) {
   return (
-    <div className="switch-row">
-      <div className="flex items-center gap-3">
-        <BookOpen className="size-4 text-muted-foreground" />
-        <div className="switch-info">
-          <Label htmlFor="tafsir-toggle" className="switch-label">
+    <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border bg-card">
+      <div className="flex items-center gap-3 min-w-0">
+        <BookOpen className="size-4 text-muted-foreground shrink-0" />
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <Label
+            htmlFor="tafsir-toggle"
+            className="text-sm font-semibold cursor-pointer"
+          >
             {t(lang, "includeTafsir")}
           </Label>
-          <span className="switch-description">
+          <span className="text-xs text-muted-foreground leading-snug">
             {lang === "ar"
               ? "إضافة تفسير مختصر أسفل كل آية"
               : "Show brief tafsir below each ayah"}
           </span>
         </div>
       </div>
-      <Switch id="tafsir-toggle" checked={enabled} onCheckedChange={onChange} />
+      <Switch
+        id="tafsir-toggle"
+        checked={enabled}
+        onCheckedChange={onChange}
+        className="data-[state=checked]:bg-primary shrink-0"
+      />
     </div>
   );
 }

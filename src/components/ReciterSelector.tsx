@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Play, Square, Shuffle } from "lucide-react";
+import { Play, Square, Shuffle, Loader2 } from "lucide-react";
 
 interface Reciter {
   id: number;
@@ -41,38 +41,26 @@ export default function ReciterSelector({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handlePlayPreview = async () => {
-    // If already playing, stop it
     if (isPlaying && audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Fetch audio for the first ayah of the current chapter
       const response = await fetch(
         `/api/quran/audio?reciterId=${selected}&chapter=${chapter}&from=1&to=1`,
       );
       const data = await response.json();
-
-      if (data.audio_files && data.audio_files.length > 0) {
-        const audioUrl = data.audio_files[0].url;
-
-        // Create or reuse audio element
-        if (!audioRef.current) {
-          audioRef.current = new Audio();
-        }
-
-        audioRef.current.src = audioUrl;
+      if (data.audio_files?.length > 0) {
+        if (!audioRef.current) audioRef.current = new Audio();
+        audioRef.current.src = data.audio_files[0].url;
         audioRef.current.onended = () => setIsPlaying(false);
         audioRef.current.onerror = () => {
           setIsPlaying(false);
           setIsLoading(false);
         };
-
         await audioRef.current.play();
         setIsPlaying(true);
       }
@@ -84,36 +72,34 @@ export default function ReciterSelector({
   };
 
   const handleRandomize = () => {
-    if (reciters.length === 0) return;
-
-    // Stop any playing audio
+    if (!reciters.length) return;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
     }
-
-    // Select a random reciter (different from current if possible)
-    let newReciter: Reciter;
+    let next: Reciter;
     if (reciters.length === 1) {
-      newReciter = reciters[0];
+      next = reciters[0];
     } else {
       do {
-        newReciter = reciters[Math.floor(Math.random() * reciters.length)];
-      } while (newReciter.id === selected);
+        next = reciters[Math.floor(Math.random() * reciters.length)];
+      } while (next.id === selected);
     }
-    onChange(newReciter.id);
+    onChange(next.id);
   };
 
   return (
-    <div className="field-group">
-      <Label htmlFor="reciter-selector">{t(lang, "selectReciter")}</Label>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="reciter-selector" className="text-xs font-medium">
+        {t(lang, "selectReciter")}
+      </Label>
       <div className="flex items-center gap-2">
         <Select
           value={selected.toString()}
           onValueChange={(val) => onChange(parseInt(val))}
         >
-          <SelectTrigger id="reciter-selector" className="flex-1">
+          <SelectTrigger id="reciter-selector" className="h-9 flex-1 text-sm">
             <SelectValue>
               {selectedReciter && (
                 <span>
@@ -123,10 +109,14 @@ export default function ReciterSelector({
               )}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="max-h-80">
+          <SelectContent className="max-h-72">
             <SelectGroup>
               {reciters.map((r) => (
-                <SelectItem key={r.id} value={r.id.toString()}>
+                <SelectItem
+                  key={r.id}
+                  value={r.id.toString()}
+                  className="text-sm"
+                >
                   {r.reciter_name}
                   {r.style ? ` (${r.style})` : ""}
                 </SelectItem>
@@ -135,7 +125,6 @@ export default function ReciterSelector({
           </SelectContent>
         </Select>
 
-        {/* Play Preview Button */}
         <Button
           type="button"
           variant="outline"
@@ -143,27 +132,26 @@ export default function ReciterSelector({
           onClick={handlePlayPreview}
           disabled={isLoading}
           title={lang === "ar" ? "معاينة الصوت" : "Preview voice"}
-          className="shrink-0"
+          className="size-9 shrink-0"
         >
           {isLoading ? (
-            <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            <Loader2 className="size-4 animate-spin" />
           ) : isPlaying ? (
-            <Square className="h-4 w-4" />
+            <Square className="size-4" />
           ) : (
-            <Play className="h-4 w-4" />
+            <Play className="size-4" />
           )}
         </Button>
 
-        {/* Randomize Button */}
         <Button
           type="button"
           variant="outline"
           size="icon"
           onClick={handleRandomize}
           title={lang === "ar" ? "اختيار عشوائي" : "Randomize"}
-          className="shrink-0"
+          className="size-9 shrink-0"
         >
-          <Shuffle className="h-4 w-4" />
+          <Shuffle className="size-4" />
         </Button>
       </div>
     </div>

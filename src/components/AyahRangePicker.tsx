@@ -22,9 +22,11 @@ export default function AyahRangePicker({
   lang,
 }: Props) {
   return (
-    <div className="field-row">
-      <div className="field-group">
-        <Label htmlFor="start-ayah">{t(lang, "startAyah")}</Label>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="start-ayah" className="text-xs font-medium">
+          {t(lang, "startAyah")}
+        </Label>
         <Input
           type="number"
           id="start-ayah"
@@ -38,10 +40,13 @@ export default function AyahRangePicker({
             );
             onStartChange(v);
           }}
+          className="h-9 text-sm"
         />
       </div>
-      <div className="field-group">
-        <Label htmlFor="end-ayah">{t(lang, "endAyah")}</Label>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="end-ayah" className="text-xs font-medium">
+          {t(lang, "endAyah")}
+        </Label>
         <Input
           type="number"
           id="end-ayah"
@@ -55,6 +60,7 @@ export default function AyahRangePicker({
             );
             onEndChange(v);
           }}
+          className="h-9 text-sm"
         />
       </div>
     </div>

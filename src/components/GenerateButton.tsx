@@ -28,28 +28,31 @@ export default function GenerateButton({
         size="lg"
         onClick={onClick}
         disabled={disabled || loading}
-        className="w-full bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 hover:from-gold-500 hover:via-gold-400 hover:to-gold-500 text-gold-900 font-bold shadow-lg shadow-gold-500/20"
+        className="w-full h-11 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground border-none shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
-            <Loader2 data-icon="inline-start" className="animate-spin" />
+            <Loader2 className="size-4 animate-spin me-2" />
             {t(lang, "generating")}
           </>
         ) : (
           <>
-            <Play data-icon="inline-start" />
+            <Play className="size-4 me-2" />
             {t(lang, "generate")}
           </>
         )}
       </Button>
 
       {loading && (
-        <div className="generate-progress">
-          <div className="generate-progress-info">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{statusText}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-1.5" />
+          <Progress
+            value={progress}
+            className="h-1.5 [&_[data-slot=progress-indicator]]:bg-primary"
+          />
         </div>
       )}
     </div>

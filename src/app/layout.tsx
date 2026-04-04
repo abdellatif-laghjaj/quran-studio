@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Quran Video Generator | مُولِّد فيديو القرآن",
+  title: "Quran Studio | استوديو القرآن",
   description:
     "Create beautiful Quranic videos with recitations, Arabic text, and calm backgrounds. أنشئ فيديوهات قرآنية بتلاوات جميلة",
   keywords: [
