@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: quran-video-generator
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PIXABAY_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
