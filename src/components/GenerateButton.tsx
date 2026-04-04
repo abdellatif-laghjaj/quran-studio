@@ -1,6 +1,9 @@
 "use client";
 
 import { Lang, t } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Play, Loader2 } from "lucide-react";
 
 interface Props {
   loading: boolean;
@@ -20,60 +23,33 @@ export default function GenerateButton({
   lang,
 }: Props) {
   return (
-    <div style={{ marginTop: "24px" }}>
-      <button
-        className="btn-primary"
+    <div className="flex flex-col gap-3">
+      <Button
+        size="lg"
         onClick={onClick}
         disabled={disabled || loading}
-        id="generate-button"
-        style={{
-          width: "100%",
-          justifyContent: "center",
-          fontSize: "18px",
-          padding: "16px",
-        }}
+        className="w-full bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 hover:from-gold-500 hover:via-gold-400 hover:to-gold-500 text-gold-900 font-bold shadow-lg shadow-gold-500/20"
       >
         {loading ? (
           <>
-            <div className="spinner" />
+            <Loader2 data-icon="inline-start" className="animate-spin" />
             {t(lang, "generating")}
           </>
         ) : (
           <>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
+            <Play data-icon="inline-start" />
             {t(lang, "generate")}
           </>
         )}
-      </button>
+      </Button>
 
       {loading && (
-        <div style={{ marginTop: "16px" }} className="fade-in">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "8px",
-              fontSize: "13px",
-              color: "var(--text-secondary)",
-            }}
-          >
+        <div className="generate-progress">
+          <div className="generate-progress-info">
             <span>{statusText}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progress}%` }} />
-          </div>
+          <Progress value={progress} className="h-1.5" />
         </div>
       )}
     </div>

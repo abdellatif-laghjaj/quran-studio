@@ -1,11 +1,14 @@
 "use client";
 
 import { t, Lang } from "@/lib/i18n";
+import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Monitor, Smartphone, Square, RectangleVertical } from "lucide-react";
 
 interface Ratio {
   id: string;
   label: string;
-  icon: string;
+  icon: React.ElementType;
   desc: string;
   descAr: string;
   width: number;
@@ -16,7 +19,7 @@ const RATIOS: Ratio[] = [
   {
     id: "16:9",
     label: "16:9",
-    icon: "🖥️",
+    icon: Monitor,
     desc: "YouTube",
     descAr: "يوتيوب",
     width: 1280,
@@ -25,7 +28,7 @@ const RATIOS: Ratio[] = [
   {
     id: "9:16",
     label: "9:16",
-    icon: "📱",
+    icon: Smartphone,
     desc: "Reels / Shorts",
     descAr: "ريلز / شورتس",
     width: 720,
@@ -34,7 +37,7 @@ const RATIOS: Ratio[] = [
   {
     id: "1:1",
     label: "1:1",
-    icon: "⬛",
+    icon: Square,
     desc: "Instagram",
     descAr: "انستغرام",
     width: 720,
@@ -43,7 +46,7 @@ const RATIOS: Ratio[] = [
   {
     id: "4:5",
     label: "4:5",
-    icon: "📋",
+    icon: RectangleVertical,
     desc: "Facebook",
     descAr: "فيسبوك",
     width: 576,
@@ -63,70 +66,37 @@ export default function AspectRatioSelector({
   lang,
 }: Props) {
   return (
-    <div>
-      <label
-        style={{
-          display: "block",
-          fontSize: "15px",
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          marginBottom: "14px",
+    <div className="field-group">
+      <Label>{t(lang, "aspectRatio")}</Label>
+      <ToggleGroup
+        type="single"
+        value={selected}
+        onValueChange={(value) => {
+          if (value) {
+            const ratio = RATIOS.find((r) => r.id === value);
+            if (ratio) onChange(ratio.id, ratio.width, ratio.height);
+          }
         }}
+        className="ratio-toggle-group"
       >
-        {t(lang, "aspectRatio")}
-      </label>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "10px",
-        }}
-      >
-        {RATIOS.map((r) => (
-          <button
-            key={r.id}
-            onClick={() => onChange(r.id, r.width, r.height)}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "6px",
-              padding: "14px 8px",
-              borderRadius: "12px",
-              border:
-                selected === r.id
-                  ? "2px solid var(--gold)"
-                  : "2px solid var(--surface-2)",
-              background:
-                selected === r.id
-                  ? "rgba(212, 175, 55, 0.12)"
-                  : "var(--surface-1)",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            <span style={{ fontSize: "22px" }}>{r.icon}</span>
-            <span
-              style={{
-                fontSize: "14px",
-                fontWeight: 700,
-                color:
-                  selected === r.id ? "var(--gold)" : "var(--text-primary)",
-              }}
+        {RATIOS.map((r) => {
+          const Icon = r.icon;
+          return (
+            <ToggleGroupItem
+              key={r.id}
+              value={r.id}
+              className="ratio-toggle-item"
+              aria-label={r.label}
             >
-              {r.label}
-            </span>
-            <span
-              style={{
-                fontSize: "11px",
-                color: "var(--text-muted)",
-              }}
-            >
-              {lang === "ar" ? r.descAr : r.desc}
-            </span>
-          </button>
-        ))}
-      </div>
+              <Icon className="size-5" />
+              <span className="font-semibold">{r.label}</span>
+              <span className="text-muted-foreground text-[10px]">
+                {lang === "ar" ? r.descAr : r.desc}
+              </span>
+            </ToggleGroupItem>
+          );
+        })}
+      </ToggleGroup>
     </div>
   );
 }

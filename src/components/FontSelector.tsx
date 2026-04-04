@@ -1,6 +1,9 @@
 "use client";
 
 import { t, Lang } from "@/lib/i18n";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface FontOption {
   id: string;
@@ -102,9 +105,9 @@ const fontFaceCSS = FONTS.map(
 ).join("\n");
 
 const categoryLabels: Record<string, Record<Lang, string>> = {
-  naskh: { ar: "✦ خطوط النسخ", en: "✦ Naskh Fonts" },
-  ruqaa: { ar: "✦ خطوط الرقعة", en: "✦ Ruqaa Fonts" },
-  modern: { ar: "✦ خطوط حديثة", en: "✦ Modern Fonts" },
+  naskh: { ar: "خطوط النسخ", en: "Naskh Fonts" },
+  ruqaa: { ar: "خطوط الرقعة", en: "Ruqaa Fonts" },
+  modern: { ar: "خطوط حديثة", en: "Modern Fonts" },
 };
 
 interface Props {
@@ -117,122 +120,35 @@ export default function FontSelector({ selected, onChange, lang }: Props) {
   const categories = ["naskh", "ruqaa", "modern"] as const;
 
   return (
-    <div>
+    <div className="field-group">
       <style dangerouslySetInnerHTML={{ __html: fontFaceCSS }} />
+      <Label>{t(lang, "fontStyle")}</Label>
 
-      <label
-        style={{
-          display: "block",
-          fontSize: "15px",
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          marginBottom: "14px",
-        }}
-      >
-        {t(lang, "fontStyle")}
-      </label>
-
-      <div
-        style={{
-          maxHeight: "380px",
-          overflowY: "auto",
-          paddingRight: "4px",
-        }}
-      >
+      <ScrollArea className="h-[300px] rounded-md border border-border p-3">
         {categories.map((cat) => {
           const catFonts = FONTS.filter((f) => f.category === cat);
           return (
-            <div key={cat} style={{ marginBottom: "14px" }}>
-              <div
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: "var(--gold-500, #d4af37)",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  marginBottom: "8px",
-                  padding: "0 4px",
-                  opacity: 0.8,
-                }}
-              >
+            <div key={cat} className="mb-4 last:mb-0">
+              <div className="text-[10px] font-semibold text-gold-500 uppercase tracking-wider mb-2 px-1">
                 {categoryLabels[cat][lang]}
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    catFonts.length === 1 ? "1fr" : "1fr 1fr",
-                  gap: "8px",
-                }}
-              >
+              <div className="grid grid-cols-2 gap-2">
                 {catFonts.map((font) => {
                   const isSelected = selected === font.file;
                   return (
                     <button
                       key={font.id}
                       onClick={() => onChange(font.file)}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "14px 8px 10px",
-                        borderRadius: "12px",
-                        border: isSelected
-                          ? "2px solid var(--gold-500, #d4af37)"
-                          : "1.5px solid rgba(255,255,255,0.06)",
-                        background: isSelected
-                          ? "linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.04))"
-                          : "rgba(255,255,255,0.02)",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        position: "relative",
-                        overflow: "hidden",
-                      }}
+                      className={cn("font-card", isSelected && "selected")}
                     >
-                      {isSelected && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "6px",
-                            right: "6px",
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            background: "var(--gold-500, #d4af37)",
-                            boxShadow: "0 0 6px rgba(212,175,55,0.5)",
-                          }}
-                        />
-                      )}
-
                       <span
-                        style={{
-                          fontSize: "22px",
-                          fontFamily: `'${font.fontFamily}', serif`,
-                          color: isSelected
-                            ? "white"
-                            : "var(--text-secondary, #a0a8c0)",
-                          direction: "rtl",
-                          lineHeight: 1.5,
-                          marginBottom: "6px",
-                          transition: "color 0.2s ease",
-                        }}
+                        className="font-card-preview"
+                        style={{ fontFamily: `'${font.fontFamily}', serif` }}
                       >
                         بِسْمِ ٱللَّهِ
                       </span>
-
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: isSelected ? 700 : 500,
-                          color: isSelected
-                            ? "var(--gold-500, #d4af37)"
-                            : "var(--text-muted, #6b7280)",
-                          letterSpacing: "0.3px",
-                          transition: "color 0.2s ease",
-                        }}
-                      >
+                      <span className="font-card-name">
                         {lang === "ar" ? font.nameAr : font.name}
                       </span>
                     </button>
@@ -242,7 +158,7 @@ export default function FontSelector({ selected, onChange, lang }: Props) {
             </div>
           );
         })}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

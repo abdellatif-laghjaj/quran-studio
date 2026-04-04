@@ -1,6 +1,8 @@
 "use client";
 
 import { Lang, t } from "@/lib/i18n";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Props {
   maxVerses: number;
@@ -20,14 +22,12 @@ export default function AyahRangePicker({
   lang,
 }: Props) {
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}
-    >
-      <div>
-        <label className="form-label">{t(lang, "startAyah")}</label>
-        <input
+    <div className="field-row">
+      <div className="field-group">
+        <Label htmlFor="start-ayah">{t(lang, "startAyah")}</Label>
+        <Input
           type="number"
-          className="input-field"
+          id="start-ayah"
           min={1}
           max={maxVerses}
           value={startAyah}
@@ -38,14 +38,13 @@ export default function AyahRangePicker({
             );
             onStartChange(v);
           }}
-          id="start-ayah"
         />
       </div>
-      <div>
-        <label className="form-label">{t(lang, "endAyah")}</label>
-        <input
+      <div className="field-group">
+        <Label htmlFor="end-ayah">{t(lang, "endAyah")}</Label>
+        <Input
           type="number"
-          className="input-field"
+          id="end-ayah"
           min={startAyah}
           max={maxVerses}
           value={endAyah}
@@ -56,7 +55,6 @@ export default function AyahRangePicker({
             );
             onEndChange(v);
           }}
-          id="end-ayah"
         />
       </div>
     </div>
