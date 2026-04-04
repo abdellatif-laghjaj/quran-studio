@@ -54,12 +54,12 @@ export default function ReciterSelector({
     try {
       // Fetch audio for the first ayah of the current chapter
       const response = await fetch(
-        `/api/quran/audio?reciterId=${selected}&chapter=${chapter}`,
+        `/api/quran/audio?reciterId=${selected}&chapter=${chapter}&from=1&to=1`,
       );
       const data = await response.json();
 
-      if (data.audioFiles && data.audioFiles.length > 0) {
-        const audioUrl = `https://verses.quran.com/${data.audioFiles[0].url}`;
+      if (data.audio_files && data.audio_files.length > 0) {
+        const audioUrl = data.audio_files[0].url;
 
         // Create or reuse audio element
         if (!audioRef.current) {

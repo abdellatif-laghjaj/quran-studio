@@ -137,19 +137,19 @@ body {
 @media (min-width: 1024px) {
   .playground {
     display: grid;
-    grid-template-columns: 320px 1fr 340px;
+    grid-template-columns: 380px 1fr 400px;
   }
 }
 
 @media (min-width: 1280px) {
   .playground {
-    grid-template-columns: 340px 1fr 380px;
+    grid-template-columns: 420px 1fr 440px;
   }
 }
 
 @media (min-width: 1536px) {
   .playground {
-    grid-template-columns: 360px 1fr 400px;
+    grid-template-columns: 460px 1fr 480px;
   }
 }
 
