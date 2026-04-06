@@ -13,24 +13,27 @@ interface Props {
 }
 
 const PRESETS = [
-  { value: 15, icon: Moon, labelKey: "dark" as const },
-  { value: 45, icon: SunDim, labelKey: "medium" as const },
-  { value: 75, icon: SunMedium, labelKey: "bright" as const },
+  { value: 85, icon: Moon, labelKey: "dark" as const },
+  { value: 55, icon: SunDim, labelKey: "medium" as const },
+  { value: 25, icon: SunMedium, labelKey: "bright" as const },
 ];
 
 export default function BrightnessControl({ value, onChange, lang }: Props) {
+  // Invert the display value: higher slider = brighter (less dim)
+  const displayValue = 100 - value;
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Label className="text-xs font-medium">{t(lang, "brightness")}</Label>
         <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-          {value}%
+          {displayValue}%
         </span>
       </div>
 
       <Slider
-        value={[value]}
-        onValueChange={([val]) => onChange(val)}
+        value={[displayValue]}
+        onValueChange={([val]) => onChange(100 - val)}
         min={0}
         max={100}
         step={1}
