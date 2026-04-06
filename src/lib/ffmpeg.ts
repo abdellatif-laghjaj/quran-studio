@@ -167,36 +167,6 @@ function reshapeArabicText(input: string): string {
 }
 
 /**
- * Reverse string while keeping combining marks (tashkeel) attached to base chars.
- * Groups [base + following diacritics] then reverses groups.
- * NO bracket mirroring — reversal already puts brackets in correct visual order
- * for FFmpeg's LTR renderer.
- */
-function reverseKeepDiacritics(text: string): string {
-  const clusters: string[] = [];
-  let current = "";
-  for (const char of text) {
-    const code = char.charCodeAt(0);
-    const isCombining =
-      TRANSPARENT.has(code) ||
-      (code >= 0x0300 && code <= 0x036f) ||
-      (code >= 0x0610 && code <= 0x061a) ||
-      (code >= 0x064b && code <= 0x065f) ||
-      code === 0x0670 ||
-      (code >= 0x06d6 && code <= 0x06ed) ||
-      (code >= 0xfe20 && code <= 0xfe2f);
-    if (isCombining && current) {
-      current += char;
-    } else {
-      if (current) clusters.push(current);
-      current = char;
-    }
-  }
-  if (current) clusters.push(current);
-  return clusters.reverse().join("");
-}
-
-/**
  * Strip invisible Unicode characters that could interfere with rendering.
  */
 function normalizeArabicText(text: string): string {
@@ -229,12 +199,20 @@ const FONTS_WITH_PRES_FORMS = new Set([
  */
 function reshapeForFFmpeg(text: string, fontFile: string): string {
   const normalized = normalizeArabicText(text);
+
+  // Reverse WORD ORDER only (not chars within words) so FFmpeg's LTR
+  // renderer displays the text visually right-to-left.
+  // Splitting on spaces with a capture group preserves original spacing.
+  const parts = normalized.split(/(\s+)/);
+  const wordReversed = parts.reverse().join("");
+
   if (FONTS_WITH_PRES_FORMS.has(fontFile)) {
-    const reshaped = reshapeArabicText(normalized);
-    return reverseKeepDiacritics(reshaped);
+    // Reshape AFTER word-reversal so forms reflect the new rendering order
+    return reshapeArabicText(wordReversed);
   }
-  // Modern font — keep original Unicode, just reverse for LTR rendering
-  return reverseKeepDiacritics(normalized);
+
+  // Modern font — word-reversed Unicode, font's OpenType handles connections
+  return wordReversed;
 }
 // ─── End Arabic Reshaper ───
 
