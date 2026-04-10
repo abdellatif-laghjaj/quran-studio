@@ -193,6 +193,25 @@ const FONTS_WITH_PRES_FORMS = new Set([
 ]);
 
 /**
+ * Reverse an Arabic string treating each (base char + its diacritics) as
+ * an atomic cluster. This correctly reverses both word order AND letter
+ * order within each word for FFmpeg's LTR renderer.
+ */
+function reverseArabicClusters(text: string): string {
+  const clusters: string[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    // Diacritics/tashkeel attach to the preceding base character
+    if (TRANSPARENT.has(code) && clusters.length > 0) {
+      clusters[clusters.length - 1] += text[i];
+    } else {
+      clusters.push(text[i]);
+    }
+  }
+  return clusters.reverse().join("");
+}
+
+/**
  * Reshape Arabic text for FFmpeg drawtext.
  * - Fonts WITH Presentation Forms: normalize → reshape → reverse (connected letters)
  * - Fonts WITHOUT: normalize → reverse only (isolated but visible)
@@ -200,19 +219,15 @@ const FONTS_WITH_PRES_FORMS = new Set([
 function reshapeForFFmpeg(text: string, fontFile: string): string {
   const normalized = normalizeArabicText(text);
 
-  // Reverse WORD ORDER only (not chars within words) so FFmpeg's LTR
-  // renderer displays the text visually right-to-left.
-  // Splitting on spaces with a capture group preserves original spacing.
-  const parts = normalized.split(/(\s+)/);
-  const wordReversed = parts.reverse().join("");
-
   if (FONTS_WITH_PRES_FORMS.has(fontFile)) {
-    // Reshape AFTER word-reversal so forms reflect the new rendering order
-    return reshapeArabicText(wordReversed);
+    // ✅ Step 1: Reshape on original RTL string → correct connection forms
+    // ✅ Step 2: Reverse the already-shaped glyphs for FFmpeg's LTR renderer
+    const shaped = reshapeArabicText(normalized);
+    return reverseArabicClusters(shaped);
   }
 
-  // Modern font — word-reversed Unicode, font's OpenType handles connections
-  return wordReversed;
+  // Modern font (OpenType handles connections): just reverse for LTR
+  return reverseArabicClusters(normalized);
 }
 // ─── End Arabic Reshaper ───
 
