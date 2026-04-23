@@ -126,4 +126,7 @@
   html {
     @apply font-sans;
   }
+  .font-arabic {
+    font-family: var(--font-arabic), "Amiri", serif;
+  }
 }
