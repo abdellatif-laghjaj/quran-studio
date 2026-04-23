@@ -1,12 +1,15 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useEditorStore } from "@/lib/store/editorStore"
 import { useAssetStore } from "@/lib/store/assetStore"
 import { fetchChapters, fetchAllVerses, fetchReciters } from "@/lib/api/quran"
 
 export function useQuranData() {
-  const { chapterId, startAyah, endAyah, reciterId } = useEditorStore()
+  const chapterId = useEditorStore((s) => s.chapterId)
+  const startAyah = useEditorStore((s) => s.startAyah)
+  const endAyah = useEditorStore((s) => s.endAyah)
+  const reciterId = useEditorStore((s) => s.reciterId)
   const {
     chapters,
     setChapters,
@@ -89,9 +92,13 @@ export function useQuranData() {
     }
   }, [chapterId, setVerses, setVersesLoading])
 
-  // Get verses in the selected range
-  const selectedVerses = verses.filter(
-    (v) => v.verse_number >= startAyah && v.verse_number <= endAyah
+  // Get verses in the selected range (memoized for stable reference)
+  const selectedVerses = useMemo(
+    () =>
+      verses.filter(
+        (v) => v.verse_number >= startAyah && v.verse_number <= endAyah
+      ),
+    [verses, startAyah, endAyah]
   )
 
   // Get current chapter

@@ -21,7 +21,9 @@ interface PreviewCanvasProps {
   videoRef?: React.RefObject<HTMLVideoElement | null>
 }
 
-export function PreviewCanvas({ videoRef: externalVideoRef }: PreviewCanvasProps) {
+export function PreviewCanvas({
+  videoRef: externalVideoRef,
+}: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const internalVideoRef = useRef<HTMLVideoElement>(null)
   // Use external ref if provided (for export), otherwise internal

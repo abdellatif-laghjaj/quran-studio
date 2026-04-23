@@ -30,7 +30,7 @@ export function ExportModal({
   onOpenChange,
   videoRef,
 }: ExportModalProps) {
-  const { exportState, startExport, reset } = useExport()
+  const { exportState, startExport, startMp4Export, reset } = useExport()
 
   const handleExportWebM = async () => {
     const videoEl = videoRef.current
@@ -130,6 +130,7 @@ export function ExportModal({
           <Button
             variant="outline"
             disabled={isExporting || exportState.status !== "done"}
+            onClick={startMp4Export}
             className="gap-2"
           >
             <HugeiconsIcon

@@ -149,17 +149,32 @@ export async function exportVideo(options: ExportOptions): Promise<Blob> {
 /**
  * Export as MP4 using FFmpeg WASM.
  * This is optional and requires loading the WASM binary (~32MB).
+ * If @ffmpeg/ffmpeg is not installed, throws a user-friendly error.
  */
 export async function exportMp4(webmBlob: Blob): Promise<void> {
-  // Dynamic import to avoid loading FFmpeg unless needed
-  const { FFmpeg } = await import("@ffmpeg/ffmpeg")
-  const { fetchFile } = await import("@ffmpeg/util")
+  let FFmpegClass: typeof import("@ffmpeg/ffmpeg").FFmpeg | null = null
+  let fetchFileFn: typeof import("@ffmpeg/util").fetchFile | null = null
 
-  const ffmpeg = new FFmpeg()
+  try {
+    const ffmpegModule = await import("@ffmpeg/ffmpeg")
+    const utilModule = await import("@ffmpeg/util")
+    FFmpegClass = ffmpegModule.FFmpeg
+    fetchFileFn = utilModule.fetchFile
+  } catch {
+    throw new Error(
+      "MP4 export requires @ffmpeg/ffmpeg and @ffmpeg/util packages. " +
+        "Install them with: bun add @ffmpeg/ffmpeg @ffmpeg/util"
+    )
+  }
 
+  if (!FFmpegClass || !fetchFileFn) {
+    throw new Error("Failed to load FFmpeg modules")
+  }
+
+  const ffmpeg = new FFmpegClass()
   await ffmpeg.load()
 
-  const inputData = await fetchFile(webmBlob)
+  const inputData = await fetchFileFn(webmBlob)
   await ffmpeg.writeFile("input.webm", inputData)
 
   await ffmpeg.exec([
@@ -173,7 +188,8 @@ export async function exportMp4(webmBlob: Blob): Promise<void> {
   ])
 
   const data = await ffmpeg.readFile("output.mp4")
-  const blob = new Blob([data], { type: "video/mp4" })
+  const uint8 = data as Uint8Array
+  const blob = new Blob([new Uint8Array(uint8)], { type: "video/mp4" })
 
   downloadBlob(blob, "ayahvid-export.mp4")
 }
