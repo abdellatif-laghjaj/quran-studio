@@ -110,8 +110,26 @@ Example reciters on islamic.network: `ar.alafasy`, `ar.minshawi`, `ar.husary`
 
 ### 5.2 Background Videos — Pixabay API
 
-**Free tier:** 5,000 requests/hour. User must provide their own free API key (obtained at pixabay.com/api/docs/).
-App prompts user to enter their API key on first use and stores it in `localStorage`.
+**Free tier:** 5,000 requests/hour. API key is stored in `.env.local` — never hardcoded or committed. Get a free key at pixabay.com/api/docs/.
+
+**Environment setup:**
+
+```bash
+# .env.local  ← git-ignored, never committed
+NEXT_PUBLIC_PIXABAY_API_KEY=your_key_here
+```
+
+```bash
+# .env.example  ← committed to repo, no real values
+NEXT_PUBLIC_PIXABAY_API_KEY=
+```
+
+```ts
+// lib/api/pixabay.ts
+const PIXABAY_KEY = process.env.NEXT_PUBLIC_PIXABAY_API_KEY
+if (!PIXABAY_KEY)
+  throw new Error("Missing NEXT_PUBLIC_PIXABAY_API_KEY — see .env.example")
+```
 
 ```ts
 // Search videos
@@ -498,9 +516,9 @@ const combinedStream = new MediaStream([
 - Cache in browser (the WASM binary is served from `/public/ffmpeg/` so it's same-origin, not CDN)
 - Run in a Web Worker to avoid blocking the main thread
 
-### Pixabay API Key — Privacy
+### Pixabay API Key — Environment Variables
 
-Store in `localStorage` under key `ayahvid_pixabay_key`. Never log it. Add a note in the UI: "Your API key is stored only in your browser."
+Load from `process.env.NEXT_PUBLIC_PIXABAY_API_KEY` set in `.env.local`. The `.env.local` file is git-ignored by default in every Next.js project — never commit real keys. The repo ships a `.env.example` with empty values so contributors know what to set. Never log the key value anywhere in the codebase.
 
 ---
 
