@@ -1,9 +1,14 @@
 "use client"
 
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useCallback } from "react"
 import { useEditorStore } from "@/lib/store/editorStore"
 import { useAssetStore } from "@/lib/store/assetStore"
-import { fetchChapters, fetchAllVerses, fetchReciters } from "@/lib/api/quran"
+import {
+  fetchChapters,
+  fetchAllVerses,
+  fetchReciters,
+  fetchAudioFiles,
+} from "@/lib/api/quran"
 
 /**
  * useQuranData handles all Quran data fetching.
@@ -28,6 +33,8 @@ export function useQuranData() {
     setReciters,
     recitersLoading,
     setRecitersLoading,
+    audioFiles,
+    setAudioFiles,
   } = useAssetStore()
 
   // Use refs to prevent duplicate fetches when multiple components use this hook
@@ -67,6 +74,14 @@ export function useQuranData() {
       .finally(() => setVersesLoading(false))
   }, [chapterId, setVerses, setVersesLoading])
 
+  // Fetch audio files when chapter or reciter changes
+  useEffect(() => {
+    if (!chapterId || !reciterId) return
+    fetchAudioFiles(reciterId, chapterId)
+      .then((files) => setAudioFiles(files))
+      .catch((err) => console.error("Failed to fetch audio files:", err))
+  }, [chapterId, reciterId, setAudioFiles])
+
   // Get verses in the selected range (memoized for stable reference)
   const selectedVerses = useMemo(
     () =>
@@ -82,6 +97,16 @@ export function useQuranData() {
   // Get current reciter
   const currentReciter = reciters.find((r) => r.id === reciterId)
 
+  // Get audio URL for a verse number
+  const getAudioUrl = useCallback(
+    (verseNumber: number): string | undefined => {
+      const verseKey = `${chapterId}:${verseNumber}`
+      const file = audioFiles.find((f) => f.verse_key === verseKey)
+      return file?.url ? `https://verses.quran.com/${file.url}` : undefined
+    },
+    [audioFiles, chapterId]
+  )
+
   return {
     chapters,
     chaptersLoading,
@@ -92,5 +117,6 @@ export function useQuranData() {
     recitersLoading,
     currentChapter,
     currentReciter,
+    getAudioUrl,
   }
 }

@@ -7,7 +7,6 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer"
 import { renderFrame, loadFont } from "@/lib/canvas/renderer"
 import { resetParticleCache } from "@/lib/canvas/renderer"
 import { RESOLUTIONS } from "@/types/editor"
-import { getVerseAudioUrl } from "@/lib/api/quran"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -49,7 +48,7 @@ export function PreviewCanvas({
     setIsPlaying,
   } = config
 
-  const { selectedVerses, versesLoading } = useQuranData()
+  const { selectedVerses, versesLoading, getAudioUrl } = useQuranData()
   const { play, stop, getDuration } = useAudioPlayer()
 
   const currentVerse = selectedVerses[currentVerseIndex] ?? null
@@ -108,8 +107,8 @@ export function PreviewCanvas({
       // Play audio for the new verse
       const nextVerse = selectedVerses[nextIdx]
       if (nextVerse) {
-        const url = getVerseAudioUrl(reciterId, nextVerse.verse_number)
-        play(url, advanceVerse)
+        const url = getAudioUrl(nextVerse.verse_number)
+        if (url) play(url, advanceVerse)
       }
     } else {
       // Reached the end -- stop playback
@@ -120,11 +119,11 @@ export function PreviewCanvas({
     currentVerseIndex,
     selectedVerses.length,
     setCurrentVerseIndex,
-    reciterId,
     play,
     stop,
     setIsPlaying,
     selectedVerses,
+    getAudioUrl,
   ])
 
   // Render loop
@@ -172,9 +171,9 @@ export function PreviewCanvas({
       animFrameRef.current = requestAnimationFrame(renderPreview)
 
       // Play audio for current verse
-      const url = getVerseAudioUrl(reciterId, currentVerse.verse_number)
+      const url = getAudioUrl(currentVerse.verse_number)
       // Pass advanceVerse as onEnded callback so audio ending triggers verse advance
-      play(url, advanceVerse)
+      if (url) play(url, advanceVerse)
     } else {
       cancelAnimationFrame(animFrameRef.current)
       if (!isPlaying) {
