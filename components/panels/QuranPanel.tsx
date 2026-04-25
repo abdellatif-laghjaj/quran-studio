@@ -88,7 +88,7 @@ export function QuranPanel() {
                         {ch.id}.
                       </span>
                       <span className="font-arabic">{ch.name_arabic}</span>
-                      <span>{ch.name_simple}</span>
+                      <span>{ch.translated_name?.name ?? ch.name_simple}</span>
                       <span className="text-xs text-muted-foreground">
                         ({ch.verses_count})
                       </span>
@@ -181,7 +181,7 @@ export function QuranPanel() {
                 {reciters.slice(0, 20).map((r) => (
                   <SelectItem key={r.id} value={String(r.id)}>
                     <span className="flex items-center gap-2">
-                      <span>{r.translated_name.name}</span>
+                      <span>{r.translated_name?.name ?? r.reciter_name}</span>
                       {r.style && (
                         <span className="text-xs text-muted-foreground">
                           ({r.style})

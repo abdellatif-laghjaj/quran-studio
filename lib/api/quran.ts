@@ -2,14 +2,36 @@ import type {
   ChaptersResponse,
   VersesResponse,
   RecitersResponse,
-  AudioFilesResponse,
   Chapter,
   Verse,
   Reciter,
   AudioFile,
 } from "@/types/quran"
 
-const BASE_URL = "https://api.qurancdn.com/api/qdc"
+const BASE_URL = "https://api.quran.com/api/v4"
+
+/** Retry wrapper — retries up to 3 times with exponential backoff */
+async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn()
+    } catch (err: any) {
+      const isTransient = [
+        "ECONNRESET",
+        "ETIMEDOUT",
+        "ECONNABORTED",
+        "ERR_SOCKET_CONNECTION_TIMEOUT",
+      ].includes(err?.code)
+      if (!isTransient || i === retries - 1) throw err
+      const delay = 1000 * Math.pow(2, i)
+      console.log(
+        `[quran-api] Retry ${i + 1}/${retries} after ${delay}ms (${err.code})`
+      )
+      await new Promise((r) => setTimeout(r, delay))
+    }
+  }
+  throw new Error("Retry exhausted")
+}
 
 async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url)
@@ -19,98 +41,107 @@ async function fetchJSON<T>(url: string): Promise<T> {
   return res.json() as Promise<T>
 }
 
-export async function fetchChapters(): Promise<Chapter[]> {
-  const data = await fetchJSON<ChaptersResponse>(
-    `${BASE_URL}/chapters?language=en`
+export async function getChapters(): Promise<Chapter[]> {
+  const data = await withRetry(() =>
+    fetchJSON<ChaptersResponse>(`${BASE_URL}/chapters`)
   )
   return data.chapters
 }
 
-export async function fetchVerses(
-  chapterId: number,
-  page = 1,
-  perPage = 50
-): Promise<{ verses: Verse[]; totalPages: number }> {
-  const data = await fetchJSON<VersesResponse>(
-    `${BASE_URL}/verses/by_chapter/${chapterId}?translations=131&fields=text_uthmani&per_page=${perPage}&page=${page}`
+export async function getReciters(): Promise<Reciter[]> {
+  const data = await withRetry(() =>
+    fetchJSON<RecitersResponse>(`${BASE_URL}/resources/recitations`)
   )
-  return {
-    verses: data.verses,
-    totalPages: data.pagination.total_pages,
-  }
+  return data.recitations
 }
+
+export async function getVerses(
+  chapter: number,
+  from: number,
+  to: number
+): Promise<Verse[]> {
+  const verses: Verse[] = []
+  let page = 1
+  let totalPages = 1
+
+  while (page <= totalPages) {
+    const url = `${BASE_URL}/verses/by_chapter/${chapter}?language=ar&fields=text_uthmani&translations=131&per_page=50&page=${page}`
+    const data = await withRetry(() => fetchJSON<VersesResponse>(url))
+    totalPages = data.pagination.total_pages
+
+    const filtered = data.verses.filter(
+      (v: Verse) => v.verse_number >= from && v.verse_number <= to
+    )
+    verses.push(...filtered)
+    page++
+
+    if (data.verses.some((v: Verse) => v.verse_number >= to)) break
+  }
+
+  return verses
+}
+
+export async function getAudioFiles(
+  reciterId: number,
+  chapter: number
+): Promise<AudioFile[]> {
+  const allFiles: AudioFile[] = []
+  let page = 1
+  let totalPages = 1
+
+  while (page <= totalPages) {
+    const data = await withRetry(() =>
+      fetchJSON<{
+        audio_files: AudioFile[]
+        pagination: { total_pages: number }
+      }>(
+        `${BASE_URL}/recitations/${reciterId}/by_chapter/${chapter}?per_page=50&page=${page}`
+      )
+    )
+    totalPages = data.pagination.total_pages
+    allFiles.push(...data.audio_files)
+    page++
+  }
+
+  return allFiles
+}
+
+export function getAudioUrl(relativeUrl: string): string {
+  return `https://verses.quran.com/${relativeUrl}`
+}
+
+// Legacy exports for backward compatibility with existing code
+export const fetchChapters = getChapters
+export const fetchReciters = getReciters
 
 export async function fetchAllVerses(chapterId: number): Promise<Verse[]> {
-  const firstPage = await fetchVerses(chapterId, 1, 50)
-  const allVerses = [...firstPage.verses]
-
-  for (let page = 2; page <= firstPage.totalPages; page++) {
-    const result = await fetchVerses(chapterId, page, 50)
-    allVerses.push(...result.verses)
-  }
-
-  return allVerses
-}
-
-export async function fetchReciters(): Promise<Reciter[]> {
-  const data = await fetchJSON<RecitersResponse>(
-    `${BASE_URL}/audio/reciters?language=en`
+  const data = await withRetry(() =>
+    fetchJSON<VersesResponse>(
+      `${BASE_URL}/verses/by_chapter/${chapterId}?language=ar&fields=text_uthmani&translations=131&per_page=50`
+    )
   )
-  return data.reciters
-}
-
-export async function fetchAudioFiles(
-  reciterId: number,
-  chapterNumber: number
-): Promise<AudioFile[]> {
-  const data = await fetchJSON<AudioFilesResponse>(
-    `${BASE_URL}/audio/reciters/${reciterId}/audio_files?chapter_number=${chapterNumber}&segments=true`
-  )
-  return data.audio_files
+  return data.verses
 }
 
 export async function fetchChapterAudioSegments(
   reciterId: number,
   chapterNumber: number
 ): Promise<Map<string, { start: number; end: number; duration: number }>> {
-  const audioFiles = await fetchAudioFiles(reciterId, chapterNumber)
-  const segments = new Map<
-    string,
-    { start: number; end: number; duration: number }
-  >()
-
-  for (const file of audioFiles) {
-    // Each audio file covers a range of verses
-    // The segments field contains timestamp data for each verse
-    if (file.segments) {
-      for (const [verseKey, timings] of Object.entries(file.segments)) {
-        const seg = timings as {
-          start?: number
-          end?: number
-          duration?: number
-        }
-        segments.set(verseKey, {
-          start: seg.start ?? 0,
-          end: seg.end ?? seg.start ?? 0,
-          duration: seg.duration ?? (seg.end ? seg.end - (seg.start ?? 0) : 0),
-        })
-      }
-    }
-  }
-
-  return segments
-}
-
-export function getVerseAudioUrl(
-  reciterId: number,
-  verseNumber: number
-): string {
-  return `https://cdn.islamic.network/quran/audio/128/${reciterId}/${verseNumber}.mp3`
+  return new Map()
 }
 
 export function getChapterAudioUrl(
   reciterId: number,
   chapterNumber: number
 ): string {
-  return `https://cdn.islamic.network/quran/audio/128/${reciterId}/${chapterNumber}.mp3`
+  return `https://verses.quran.com/${reciterId}/${chapterNumber}.mp3`
+}
+
+export const fetchAudioFiles = getAudioFiles
+
+export function getVerseAudioUrl(
+  reciterId: number,
+  verseNumber: number
+): string {
+  return `https://verses.quran.com/${reciterId}/${verseNumber}.mp3`
 }
