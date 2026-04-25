@@ -40,6 +40,7 @@ export interface AudioFile {
   url: string
   duration: number
   format: string
+  segments?: Record<string, { start: number; end: number; duration: number }>
 }
 
 export interface ChaptersResponse {

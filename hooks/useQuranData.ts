@@ -1,10 +1,15 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useEditorStore } from "@/lib/store/editorStore"
 import { useAssetStore } from "@/lib/store/assetStore"
 import { fetchChapters, fetchAllVerses, fetchReciters } from "@/lib/api/quran"
 
+/**
+ * useQuranData handles all Quran data fetching.
+ * The fetch effects run only once via refs to prevent duplicate fetches
+ * from multiple components calling this hook simultaneously.
+ */
 export function useQuranData() {
   const chapterId = useEditorStore((s) => s.chapterId)
   const startAyah = useEditorStore((s) => s.startAyah)
@@ -25,71 +30,41 @@ export function useQuranData() {
     setRecitersLoading,
   } = useAssetStore()
 
-  // Fetch chapters on mount
+  // Use refs to prevent duplicate fetches when multiple components use this hook
+  const chaptersFetchedRef = useRef(false)
+  const recitersFetchedRef = useRef(false)
+
+  // Fetch chapters once
   useEffect(() => {
-    if (chapters.length > 0) return
+    if (chapters.length > 0 || chaptersFetchedRef.current) return
+    chaptersFetchedRef.current = true
 
-    let cancelled = false
     setChaptersLoading(true)
-
     fetchChapters()
-      .then((data) => {
-        if (!cancelled) setChapters(data)
-      })
-      .catch((err) => {
-        console.error("Failed to fetch chapters:", err)
-      })
-      .finally(() => {
-        if (!cancelled) setChaptersLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
+      .then((data) => setChapters(data))
+      .catch((err) => console.error("Failed to fetch chapters:", err))
+      .finally(() => setChaptersLoading(false))
   }, [chapters.length, setChapters, setChaptersLoading])
 
-  // Fetch reciters on mount
+  // Fetch reciters once
   useEffect(() => {
-    if (reciters.length > 0) return
+    if (reciters.length > 0 || recitersFetchedRef.current) return
+    recitersFetchedRef.current = true
 
-    let cancelled = false
     setRecitersLoading(true)
-
     fetchReciters()
-      .then((data) => {
-        if (!cancelled) setReciters(data)
-      })
-      .catch((err) => {
-        console.error("Failed to fetch reciters:", err)
-      })
-      .finally(() => {
-        if (!cancelled) setRecitersLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
+      .then((data) => setReciters(data))
+      .catch((err) => console.error("Failed to fetch reciters:", err))
+      .finally(() => setRecitersLoading(false))
   }, [reciters.length, setReciters, setRecitersLoading])
 
   // Fetch verses when chapter changes
   useEffect(() => {
-    let cancelled = false
     setVersesLoading(true)
-
     fetchAllVerses(chapterId)
-      .then((data) => {
-        if (!cancelled) setVerses(data)
-      })
-      .catch((err) => {
-        console.error("Failed to fetch verses:", err)
-      })
-      .finally(() => {
-        if (!cancelled) setVersesLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
+      .then((data) => setVerses(data))
+      .catch((err) => console.error("Failed to fetch verses:", err))
+      .finally(() => setVersesLoading(false))
   }, [chapterId, setVerses, setVersesLoading])
 
   // Get verses in the selected range (memoized for stable reference)

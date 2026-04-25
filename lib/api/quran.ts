@@ -69,9 +69,48 @@ export async function fetchAudioFiles(
   return data.audio_files
 }
 
+export async function fetchChapterAudioSegments(
+  reciterId: number,
+  chapterNumber: number
+): Promise<Map<string, { start: number; end: number; duration: number }>> {
+  const audioFiles = await fetchAudioFiles(reciterId, chapterNumber)
+  const segments = new Map<
+    string,
+    { start: number; end: number; duration: number }
+  >()
+
+  for (const file of audioFiles) {
+    // Each audio file covers a range of verses
+    // The segments field contains timestamp data for each verse
+    if (file.segments) {
+      for (const [verseKey, timings] of Object.entries(file.segments)) {
+        const seg = timings as {
+          start?: number
+          end?: number
+          duration?: number
+        }
+        segments.set(verseKey, {
+          start: seg.start ?? 0,
+          end: seg.end ?? seg.start ?? 0,
+          duration: seg.duration ?? (seg.end ? seg.end - (seg.start ?? 0) : 0),
+        })
+      }
+    }
+  }
+
+  return segments
+}
+
 export function getVerseAudioUrl(
   reciterId: number,
   verseNumber: number
 ): string {
   return `https://cdn.islamic.network/quran/audio/128/${reciterId}/${verseNumber}.mp3`
+}
+
+export function getChapterAudioUrl(
+  reciterId: number,
+  chapterNumber: number
+): string {
+  return `https://cdn.islamic.network/quran/audio/128/${reciterId}/${chapterNumber}.mp3`
 }
