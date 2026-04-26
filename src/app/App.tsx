@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { Play, Pause, Loader2, Film, Settings } from "lucide-react";
 import { VideoConfig } from "../features/video-editor/types";
 import { SURAHS } from "../features/quran/data/surahs";
-import Sidebar from "../layouts/Sidebar";
+import LeftSidebar from "../layouts/LeftSidebar";
+import RightSidebar from "../layouts/RightSidebar";
 import { useQuranData } from "../features/quran/hooks/useQuranData";
 import { useAudioRecorder } from "../features/audio/hooks/useAudioRecorder";
 import { useVideoExporter } from "../features/video-editor/hooks/useVideoExporter";
@@ -113,7 +114,8 @@ export default function App() {
         s001 s114
       </div>
 
-      <Sidebar
+      {/* LEFT SIDEBAR */}
+      <LeftSidebar
         config={config}
         setConfig={setConfig}
         errorMsg={errorMsg}
@@ -123,8 +125,6 @@ export default function App() {
         setIsSurahOpen={setIsSurahOpen}
         surahSearch={surahSearch}
         setSurahSearch={setSurahSearch}
-        typoTab={typoTab}
-        setTypoTab={setTypoTab}
       />
 
       {/* PREVIEW AREA */}
@@ -217,6 +217,14 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {/* RIGHT SIDEBAR */}
+      <RightSidebar
+        config={config}
+        setConfig={setConfig}
+        typoTab={typoTab}
+        setTypoTab={setTypoTab}
+      />
 
       <AboutOverlay
         isOpen={isSettingsOpen}
