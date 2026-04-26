@@ -83,7 +83,7 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
             {/* Logo Container with Glow */}
             <div className="relative group cursor-default mt-4">
               <div className="absolute -inset-4 bg-emerald-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
-              <div className="relative w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center border border-white/10 shadow-2xl ring-1 ring-white/5 group-hover:scale-105 transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)">
+              <div className="relative w-24 h-24 bg-white/10 rounded-[1.75rem] flex items-center justify-center border border-white/10 shadow-2xl ring-1 ring-white/5 group-hover:scale-105 transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)">
                 <img
                   src="/icon/favicon.svg"
                   alt="Logo"
@@ -139,7 +139,7 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/10 text-zinc-400 hover:text-white block"
+                      className="group relative p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-[transform,background-color,border-color,color,box-shadow] duration-300 hover:-translate-y-1 active:scale-[0.96] hover:shadow-lg hover:shadow-emerald-500/10 text-zinc-400 hover:text-white block"
                     >
                       {getIcon(link.platform)}
                       {/* Tooltip-ish Glow */}
@@ -172,14 +172,14 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                 <div className="flex gap-2 justify-center">
                   <button
                     onClick={() => handleSetDefault("Download")}
-                    className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-300 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-[0.96] text-xs font-medium text-zinc-300 transition-[transform,background-color] flex items-center gap-2"
                   >
                     <Download size={14} />
                     Downloads
                   </button>
                   <button
                     onClick={() => handleSetDefault("Documents")}
-                    className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-300 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-[0.96] text-xs font-medium text-zinc-300 transition-[transform,background-color] flex items-center gap-2"
                   >
                     <FileText size={14} />
                     Documents
@@ -196,7 +196,7 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                   />
                   <button
                     onClick={handleBrowse}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 active:scale-[0.96] text-zinc-400 hover:text-white transition-[transform,background-color,color]"
                     title="Browse Folder"
                   >
                     <FolderOpen size={14} />
@@ -205,7 +205,7 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
 
                 <button
                   onClick={toggleSkipDialog}
-                  className={`w-full p-3 rounded-xl border transition-all flex items-center justify-between group ${skipDialog ? "bg-emerald-500/10 border-emerald-500/20" : "bg-white/5 border-white/5 hover:bg-white/10"}`}
+                  className={`w-full p-3 rounded-xl border transition-[transform,background-color,border-color] active:scale-[0.96] flex items-center justify-between group ${skipDialog ? "bg-emerald-500/10 border-emerald-500/20" : "bg-white/5 border-white/5 hover:bg-white/10"}`}
                 >
                   <div className="text-left">
                     <span
@@ -283,25 +283,25 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none"></div>
 
         {/* Header / Tabs */}
-        <div className="flex items-center justify-between p-2 m-2 bg-white/5 rounded-[1.5rem] border border-white/5 relative z-10">
+        <div className="flex items-center justify-between p-2 m-2 bg-white/5 rounded-[1.75rem] border border-white/5 relative z-10">
           <div className="flex items-center gap-1 w-full">
             <button
               onClick={() => setActiveTab("info")}
-              className={`flex-1 py-2.5 rounded-2xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === "info" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
+              className={`flex-1 py-2.5 rounded-[1.25rem] text-sm font-medium transition-[background-color,color,box-shadow] duration-300 flex items-center justify-center gap-2 ${activeTab === "info" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
             >
               <Info size={16} />
               <span>Info</span>
             </button>
             <button
               onClick={() => setActiveTab("download")}
-              className={`flex-1 py-2.5 rounded-2xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === "download" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
+              className={`flex-1 py-2.5 rounded-[1.25rem] text-sm font-medium transition-[background-color,color,box-shadow] duration-300 flex items-center justify-center gap-2 ${activeTab === "download" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
             >
               <Download size={16} />
               <span>Export</span>
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              className={`flex-1 py-2.5 rounded-2xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === "settings" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
+              className={`flex-1 py-2.5 rounded-[1.25rem] text-sm font-medium transition-[background-color,color,box-shadow] duration-300 flex items-center justify-center gap-2 ${activeTab === "settings" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
             >
               <Settings size={16} />
               <span>Settings</span>

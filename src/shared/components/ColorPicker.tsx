@@ -126,7 +126,7 @@ export default function ColorPicker({
       <button
         ref={triggerRef}
         onClick={toggleOpen}
-        className={`w-8 h-8 rounded-full border border-white/20 shadow-lg transition-transform hover:scale-110 active:scale-95 ring-2 ring-transparent hover:ring-white/10 focus:outline-none overflow-hidden relative ${className}`}
+        className={`w-8 h-8 rounded-full border border-white/20 shadow-lg transition-transform hover:scale-110 active:scale-[0.96] ring-2 ring-transparent hover:ring-white/10 focus:outline-none overflow-hidden relative ${className}`}
         style={{ backgroundColor: color }}
         aria-label="Open color picker"
       >
@@ -138,12 +138,12 @@ export default function ColorPicker({
           <div
             ref={popoverRef}
             style={{ top: position.top, left: position.left }}
-            className="fixed z-[9999] w-[280px] bg-[#18181b] border border-[#27272a] rounded-xl shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-200"
+            className="fixed z-[9999] w-[280px] bg-[#18181b] border border-[#27272a] rounded-2xl shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-200"
           >
             {/* Header */}
             <div className="flex items-center gap-3 mb-4 pb-3 border-b border-white/5">
               <div
-                className="w-10 h-10 rounded-lg border border-white/10 shadow-inner"
+                className="w-10 h-10 rounded-xl border border-white/10 shadow-inner"
                 style={{ backgroundColor: color }}
               />
               <div className="flex-1 flex items-center bg-black/40 border border-white/10 rounded-lg px-3 h-9 focus-within:border-studio-accent transition-colors">
@@ -178,7 +178,7 @@ export default function ColorPicker({
                     onChange(c);
                     setIsOpen(false);
                   }}
-                  className={`w-8 h-8 rounded-lg cursor-pointer transition-all hover:scale-110 hover:shadow-lg relative group border border-white/5 ${color.toLowerCase() === c.toLowerCase() ? "ring-2 ring-white ring-offset-2 ring-offset-[#18181b]" : ""}`}
+                  className={`w-8 h-8 rounded-lg cursor-pointer transition-[transform,box-shadow] hover:scale-110 active:scale-[0.96] hover:shadow-lg relative group border border-white/5 ${color.toLowerCase() === c.toLowerCase() ? "ring-2 ring-white ring-offset-2 ring-offset-[#18181b]" : ""}`}
                   style={{ backgroundColor: c }}
                   title={c}
                 >
@@ -194,9 +194,9 @@ export default function ColorPicker({
             </div>
 
             {/* Gradient Spectrum Button */}
-            <div className="relative group rounded-lg overflow-hidden h-9 cursor-pointer ring-1 ring-white/10 hover:ring-white/30 transition-all">
+            <div className="relative group rounded-lg overflow-hidden h-9 cursor-pointer ring-1 ring-white/10 hover:ring-white/30 transition-[box-shadow]">
               <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-green-500 to-blue-500 opacity-80 group-hover:opacity-100 transition-opacity" />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] group-hover:backdrop-blur-none transition-all">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] group-hover:backdrop-blur-none transition-[backdrop-filter]">
                 <span className="text-xs font-bold text-white shadow-sm flex items-center gap-2">
                   Custom Spectrum
                 </span>

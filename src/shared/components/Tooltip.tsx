@@ -25,11 +25,11 @@ export default function Tooltip({
       {isVisible && (
         <div
           className={`
-          absolute z-[200] px-2.5 py-1.5 text-[10px] font-bold tracking-wide uppercase text-zinc-200 bg-[#18181b] border border-white/10 rounded-lg shadow-2xl whitespace-nowrap pointer-events-none animate-in fade-in zoom-in-95 duration-150
-          ${position === "top" ? "bottom-full mb-2" : ""}
-          ${position === "bottom" ? "top-full mt-2" : ""}
-          ${position === "left" ? "right-full mr-2" : ""}
-          ${position === "right" ? "left-full ml-2" : ""}
+          absolute z-[200] px-2.5 py-1.5 text-[10px] font-bold tracking-wide uppercase text-zinc-200 bg-[#18181b] border border-white/10 rounded-lg shadow-2xl whitespace-nowrap pointer-events-none
+          ${position === "top" ? "bottom-full mb-2 animate-in fade-in slide-in-from-bottom-1 duration-150" : ""}
+          ${position === "bottom" ? "top-full mt-2 animate-in fade-in slide-in-from-top-1 duration-150" : ""}
+          ${position === "left" ? "right-full mr-2 animate-in fade-in slide-in-from-right-1 duration-150" : ""}
+          ${position === "right" ? "left-full ml-2 animate-in fade-in slide-in-from-left-1 duration-150" : ""}
         `}
         >
           {content}

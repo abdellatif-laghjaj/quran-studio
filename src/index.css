@@ -11,6 +11,14 @@
     --color-studio-textMuted: #a1a1aa;
     --color-studio-accent: #a3004c;
     --color-studio-accentHover: #7a0038;
+
+    /* Subtle shadows for dark mode */
+    --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.13);
+    --shadow-elevated:
+      0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-elevated-hover:
+      0 0 0 1px rgba(255, 255, 255, 0.13), 0 8px 24px rgba(0, 0, 0, 0.5);
   }
 
   @font-face {
@@ -38,6 +46,27 @@
     -webkit-user-select: none;
     overscroll-behavior: none; /* Prevent bounce effect */
     background-color: var(--color-studio-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Text wrapping improvements */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Tabular numbers for dynamic content */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Allow text selection on specific elements if needed */

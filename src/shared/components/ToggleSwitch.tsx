@@ -9,7 +9,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   checked,
   onChange,
 }) => (
-  <label className="relative inline-block w-[50px] h-[26px] shrink-0 cursor-pointer">
+  <label className="relative inline-block w-[50px] h-[26px] shrink-0 cursor-pointer active:scale-[0.96] transition-transform">
     <input
       type="checkbox"
       className="peer sr-only"

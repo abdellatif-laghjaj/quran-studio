@@ -146,7 +146,7 @@ export default function App() {
           <button
             onClick={togglePlay}
             disabled={isAnyExporting || isLoading || verses.length === 0}
-            className="w-16 h-16 rounded-full bg-studio-panel border border-studio-border flex items-center justify-center hover:bg-studio-accent hover:border-studio-accent hover:text-white hover:scale-105 hover:shadow-[0_0_20px_var(--color-qdc-blue)] transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-studio-panel disabled:hover:cursor-not-allowed group relative text-studio-text"
+            className="w-16 h-16 rounded-full bg-studio-panel border border-studio-border flex items-center justify-center hover:bg-studio-accent hover:border-studio-accent hover:text-white hover:scale-105 hover:shadow-[0_0_20px_var(--color-qdc-blue)] active:scale-[0.96] transition-[transform,background-color,border-color,color,box-shadow] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-studio-panel disabled:hover:cursor-not-allowed group relative text-studio-text"
           >
             {/* Spinner Overlay */}
             {isBuffering && (
@@ -168,7 +168,7 @@ export default function App() {
             disabled={
               isAnyExporting || isLoading || verses.length === 0 || isBuffering
             }
-            className="flex items-center gap-3 px-8 py-5 bg-studio-accent hover:bg-studio-accentHover text-white rounded-full font-bold shadow-[0_0_25px_var(--color-qdc-blue)] hover:shadow-[0_0_35px_var(--color-qdc-blue)] transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+            className="flex items-center gap-3 px-8 py-5 bg-studio-accent hover:bg-studio-accentHover text-white rounded-full font-bold shadow-[0_0_25px_var(--color-qdc-blue)] hover:shadow-[0_0_35px_var(--color-qdc-blue)] transition-[transform,background-color,box-shadow] transform hover:scale-105 active:scale-[0.96] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
           >
             {isVideoExporting ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -182,7 +182,7 @@ export default function App() {
           <button
             onClick={() => setIsSettingsOpen(true)}
             disabled={isAnyExporting}
-            className="w-14 h-14 rounded-full bg-studio-panel border border-studio-border flex items-center justify-center hover:bg-zinc-700 hover:border-zinc-600 hover:text-white hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-studio-panel disabled:hover:cursor-not-allowed text-studio-textMuted"
+            className="w-14 h-14 rounded-full bg-studio-panel border border-studio-border flex items-center justify-center hover:bg-zinc-700 hover:border-zinc-600 hover:text-white hover:scale-105 active:scale-[0.96] transition-[transform,background-color,border-color,color] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-studio-panel disabled:hover:cursor-not-allowed text-studio-textMuted"
           >
             <Settings className="w-6 h-6" />
           </button>
@@ -197,7 +197,7 @@ export default function App() {
             <div className="relative">
               <div className="w-24 h-24 border-4 border-studio-panel border-t-studio-accent rounded-full animate-spin"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-white tabular-nums">
                   {videoExportProgress}%
                 </span>
               </div>
