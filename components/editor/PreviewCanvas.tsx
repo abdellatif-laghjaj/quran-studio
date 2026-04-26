@@ -25,11 +25,9 @@ export function PreviewCanvas({
 }: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const internalVideoRef = useRef<HTMLVideoElement>(null)
-  // Use external ref if provided (for export), otherwise internal
   const videoRef = externalVideoRef ?? internalVideoRef
   const animFrameRef = useRef<number>(0)
   const startTimeRef = useRef<number>(0)
-  // Guard to prevent double-triggering verse advance (both audio ended + elapsed timer)
   const justAdvancedRef = useRef(false)
 
   const config = useEditorStore()
@@ -53,12 +51,10 @@ export function PreviewCanvas({
 
   const currentVerse = selectedVerses[currentVerseIndex] ?? null
 
-  // Load font when it changes
   useEffect(() => {
     loadFont(font)
   }, [font])
 
-  // Load background video when URL changes
   useEffect(() => {
     if (backgroundType === "video" && pixabayVideoUrl && videoRef.current) {
       const video = videoRef.current
@@ -70,18 +66,15 @@ export function PreviewCanvas({
     }
   }, [backgroundType, pixabayVideoUrl])
 
-  // Reset particle cache when effects change
   useEffect(() => {
     resetParticleCache()
   }, [particles, particleDensity, aspectRatio])
 
-  // Get verse duration
   const getVerseDuration = useCallback(
     (verseIdx: number): number => {
       if (typeof durationPerVerse === "number") {
         return durationPerVerse
       }
-      // "auto" mode: use the current audio duration if loaded
       const verse = selectedVerses[verseIdx]
       if (!verse) return 5
       const dur = getDuration()
@@ -90,9 +83,8 @@ export function PreviewCanvas({
     [durationPerVerse, selectedVerses, getDuration]
   )
 
-  // Advance to next verse — triggered by audio ended event or elapsed timer
   const advanceVerse = useCallback(() => {
-    if (justAdvancedRef.current) return // guard against double-trigger
+    if (justAdvancedRef.current) return
 
     if (currentVerseIndex < selectedVerses.length - 1) {
       justAdvancedRef.current = true
@@ -104,29 +96,25 @@ export function PreviewCanvas({
       setCurrentVerseIndex(nextIdx)
       startTimeRef.current = performance.now()
 
-      // Play audio for the new verse
       const nextVerse = selectedVerses[nextIdx]
       if (nextVerse) {
         const url = getAudioUrl(nextVerse.verse_number)
-        if (url) play(url, advanceVerse)
+        if (url) play(url)
       }
     } else {
-      // Reached the end -- stop playback
       stop()
       setIsPlaying(false)
     }
   }, [
     currentVerseIndex,
-    selectedVerses.length,
+    selectedVerses,
     setCurrentVerseIndex,
     play,
     stop,
     setIsPlaying,
-    selectedVerses,
     getAudioUrl,
   ])
 
-  // Render loop
   const renderPreview = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !currentVerse) return
@@ -138,7 +126,6 @@ export function PreviewCanvas({
     const verseDuration = getVerseDuration(currentVerseIndex)
     const progress = isPlaying ? Math.min(elapsed / verseDuration, 1) : 0.3
 
-    // Elapsed timer check as fallback -- skip if we just advanced via audio ended event
     if (
       isPlaying &&
       elapsed >= verseDuration &&
@@ -164,21 +151,17 @@ export function PreviewCanvas({
     selectedVerses.length,
   ])
 
-  // Start/stop animation and audio
   useEffect(() => {
     if (isPlaying && currentVerse) {
       startTimeRef.current = performance.now()
       animFrameRef.current = requestAnimationFrame(renderPreview)
 
-      // Play audio for current verse
       const url = getAudioUrl(currentVerse.verse_number)
-      // Pass advanceVerse as onEnded callback so audio ending triggers verse advance
-      if (url) play(url, advanceVerse)
+      if (url) play(url)
     } else {
       cancelAnimationFrame(animFrameRef.current)
       if (!isPlaying) {
         stop()
-        // Render a static frame
         const canvas = canvasRef.current
         if (canvas && currentVerse) {
           const ctx = canvas.getContext("2d")
@@ -201,10 +184,8 @@ export function PreviewCanvas({
     config,
     reciterId,
     currentVerseIndex,
-    advanceVerse,
   ])
 
-  // Re-render when config or verse changes (static preview)
   useEffect(() => {
     if (!isPlaying && canvasRef.current && currentVerse) {
       const ctx = canvasRef.current.getContext("2d")
@@ -243,7 +224,6 @@ export function PreviewCanvas({
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3">
-      {/* Canvas container */}
       <div className="relative flex items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-black/40 shadow-2xl">
         <canvas
           ref={canvasRef}
@@ -251,7 +231,6 @@ export function PreviewCanvas({
           height={Math.round(640 * (h / w))}
           className="max-h-[60vh] w-auto"
         />
-        {/* Hidden video element for background */}
         <video
           ref={videoRef}
           className="hidden"
@@ -262,7 +241,6 @@ export function PreviewCanvas({
         />
       </div>
 
-      {/* Playback controls */}
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -296,7 +274,6 @@ export function PreviewCanvas({
         </Button>
       </div>
 
-      {/* Verse info */}
       <div className="text-center text-xs text-muted-foreground">
         {currentVerse ? (
           <>

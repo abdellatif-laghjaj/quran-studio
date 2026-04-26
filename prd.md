@@ -1,391 +1,379 @@
 # PRD — AyahVid: Quran Video Generator
 
-> Open-source Next.js web app · Fully browser-based · No backend required
+> Open-source Next.js 16 web app · Server-side FFmpeg rendering · Zero paid services
 
 ---
 
 ## 1. Overview
 
-**AyahVid** lets any Muslim user compose and export beautiful Quran recitation videos directly in the browser — no server, no paid API, no FFmpeg binary to install. The user picks a surah, a verse range (max 10 ayahs), a reciter, a background video, a font, an aspect ratio, and visual effects. The app renders everything on a `<canvas>` and exports a downloadable video file.
+**AyahVid** lets any Muslim user compose and export beautiful Quran recitation videos — picking a surah, verse range (max 10 ayahs), reciter, background video, font, aspect ratio, and visual effects. The user configures everything in the browser UI; video rendering is handled on the **server** via a Next.js API route using `fluent-ffmpeg`. The finished MP4 streams directly back to the browser for download.
 
 **Target users:** Content creators, dawah channels, personal use, mosques, educators.
 
-**Constraints:** Everything runs in the browser. Zero paid services. Zero backend.
+**Key constraint:** No paid services. All APIs and packages are free/open-source.
 
 ---
 
-## 2. Goals & Non-Goals
+## 2. Architecture Overview
 
-### Goals
+```
+Browser (React UI)
+  │  Form data (surah, ayah range, reciter, theme, font, dimensions, opacity)
+  │
+  ▼
+POST /api/generate  (Next.js API Route — server)
+  │
+  ├─ quran.com API v4  →  verse texts (text_uthmani) + audio URLs
+  ├─ Pixabay API       →  random background video URL (by theme)
+  ├─ fluent-ffmpeg     →  render MP4 (drawtext overlays + audio concat)
+  │
+  └─ Stream MP4 back to browser  →  <a download> triggered on client
+```
 
-- Generate publication-ready Quran videos from browser only
-- Support 4 aspect ratios (16:9, 9:16, 1:1, 4:5)
-- Support multiple Quranic fonts, all Arabic-shaped correctly
-- Verse-by-verse playback and video export with recitation audio
-- Background footage from Pixabay (free, API-key-gated but free tier is enough)
-- Effects: Ken Burns on background, verse fade-in/out, text animation, vignette
+**Why server-side FFmpeg instead of browser WASM?**
 
-### Non-Goals
+| Factor              | Browser WASM (@ffmpeg/ffmpeg) | Server fluent-ffmpeg       |
+| ------------------- | ----------------------------- | -------------------------- |
+| Arabic text shaping | Manual reshaper or broken     | HarfBuzz (system FFmpeg)   |
+| Font rendering      | Canvas-dependent              | Full freetype + fontconfig |
+| Performance         | Slow, RAM-limited             | Full CPU, no 32MB limit    |
+| Output quality      | WebM-first, MP4 optional      | Native H.264 + AAC MP4     |
+| Cross-browser       | COOP/COEP headers required    | No browser quirks          |
 
-- Server-side rendering or cloud video processing
-- Paid API integrations
-- Mobile native apps (PWA is a stretch goal)
-- Custom user-uploaded background videos (v2)
-- Custom user-uploaded audio (v2)
+The server uses system FFmpeg (Docker/Linux on production, `@ffmpeg-installer/ffmpeg` as local fallback) and detects HarfBuzz support automatically — enabling native Arabic text shaping when available, and falling back to a built-in reshape + reverse pipeline for local dev.
 
 ---
 
 ## 3. User Flow
 
 ```
-[1] Select Surah
-    └─> [2] Select Ayah Range (start – end, max 10)
-              └─> [3] Select Reciter
-                        └─> [4] Select Aspect Ratio
-                                  └─> [5] Choose Background (search Pixabay)
-                                            └─> [6] Style Panel (font, size, colors, effects)
-                                                      └─> [7] Live Preview (canvas)
-                                                                └─> [8] Generate & Download
+[1] Select Surah          (searchable dropdown — 114 surahs)
+      └─> [2] Ayah Range  (start / end, max 10 verses)
+                └─> [3] Reciter
+                          └─> [4] Aspect Ratio  (16:9, 9:16, 1:1, 4:5)
+                                    └─> [5] Background Theme  (Pixabay category)
+                                              └─> [6] Style   (font, dimness, opacity)
+                                                        └─> [7] Generate → stream MP4 download
 ```
 
 ---
 
 ## 4. Tech Stack
 
-| Layer            | Choice                                                  | Why                                        |
-| ---------------- | ------------------------------------------------------- | ------------------------------------------ |
-| Framework        | **Next.js 16.2.3** (App Router)                         | Static export capable, good DX             |
-| Language         | **TypeScript**                                          | Type safety for canvas math and API shapes |
-| Styling          | **Tailwind CSS v4.2.4**                                 | Utility-first, no runtime                  |
-| UI Components    | **shadcn/ui**                                           | Accessible, unstyled-first, Radix-based    |
-| State            | **Zustand 5.0.12**                                      | Minimal, no boilerplate                    |
-| Canvas Rendering | **Browser Canvas 2D API**                               | Native, no deps                            |
-| Video Recording  | **MediaRecorder API**                                   | Native, no deps, outputs WebM              |
-| MP4 Encoding     | **@ffmpeg/ffmpeg 0.12.15 + @ffmpeg/util 0.12.2** (WASM) | Client-side MP4 transcode from WebM        |
-| Audio            | **Web Audio API**                                       | Mix recitation audio with canvas stream    |
-| Font Loading     | **FontFace API**                                        | Load Quranic fonts at runtime              |
-| Animations (UI)  | **Framer Motion 12.38.0**                               | Smooth UI transitions                      |
-| HTTP Client      | **native fetch**                                        | No extra dep needed                        |
+| Layer          | Package                         | Version                 | Notes                                   |
+| -------------- | ------------------------------- | ----------------------- | --------------------------------------- |
+| Framework      | `next`                          | **16.2.4**              | App Router, streaming responses         |
+| UI Runtime     | `react` + `react-dom`           | **19.2.4**              |                                         |
+| Language       | `typescript`                    | **6.0.2**               | Strict mode                             |
+| Styling        | `tailwindcss`                   | **4.2.2**               | Via `@tailwindcss/postcss`              |
+| CSS PostCSS    | `@tailwindcss/postcss`          | **4.2.2**               | Replaces old postcss plugin             |
+| UI Components  | `shadcn` (CLI) + `radix-ui`     | **4.2.0** / **1.4.3**   | Headless, accessible                    |
+| Icons          | `lucide-react`                  | **1.8.0**               |                                         |
+| Variants       | `class-variance-authority`      | **0.7.1**               |                                         |
+| Class merge    | `tailwind-merge` + `clsx`       | **3.5.0** / **2.1.1**   | `cn()` helper                           |
+| Animations     | `tw-animate-css`                | **1.4.0**               | Tailwind v4 animation plugin            |
+| HTTP client    | `axios`                         | **1.15.1**              | Quran + Pixabay API calls (server-side) |
+| FFmpeg wrapper | `fluent-ffmpeg`                 | **2.1.3**               | Server-side video rendering             |
+| FFmpeg binary  | `@ffmpeg-installer/ffmpeg`      | **1.1.0**               | Local dev fallback                      |
+| FFprobe binary | `@ffprobe-installer/ffprobe`    | **2.1.2**               | Audio duration probing                  |
+| FFmpeg types   | `@types/fluent-ffmpeg`          | **2.1.28**              |                                         |
+| UUID           | `uuid` + `@types/uuid`          | **14.0.0** / **11.0.0** | Temp dir naming                         |
+| Linting        | `eslint` + `eslint-config-next` | **10.2.0** / **16.2.4** |                                         |
+| Formatting     | `prettier`                      | latest                  |                                         |
 
 ---
 
-## 5. APIs & Free Resources
+## 5. Environment Variables
 
-### 5.1 Quran Data — Quran.com API v4
+All secrets live in `.env.local` (git-ignored by Next.js by default). Never commit real keys.
 
-**Base URL:** `https://api.qurancdn.com/api/qdc`
+```bash
+# .env.local  ← never commit
+PIXABAY_API_KEY=your_pixabay_key_here
+```
+
+```bash
+# .env.example  ← commit this, no real values
+PIXABAY_API_KEY=
+```
+
+**Why no `NEXT_PUBLIC_` prefix?**
+The Pixabay API call is made from the **server** (inside the `/api/generate` route), so the key never reaches the browser. Using a plain `PIXABAY_API_KEY` keeps it fully private.
+
+```ts
+// lib/pixabay.ts — server-only
+const PIXABAY_KEY = process.env.PIXABAY_API_KEY
+if (!PIXABAY_KEY) throw new Error("Missing PIXABAY_API_KEY in .env.local")
+```
+
+---
+
+## 6. APIs & Free Resources
+
+### 6.1 Quran.com API v4
+
+**Base URL:** `https://api.quran.com/api/v4`
 No API key required. CORS-enabled. Completely free.
 
 ```ts
-// Get all surahs (chapters)
-GET /chapters?language=en
-→ { chapters: [{ id, name_arabic, name_simple, verses_count, ... }] }
+// All 114 chapters
+GET /chapters
+→ { chapters: [{ id, name_simple, name_arabic, verses_count, revelation_place }] }
 
-// Get verses for a chapter
+// Verses for a chapter (paginated, 50 per page)
 GET /verses/by_chapter/{chapter_id}
-  ?translations=131          // 131 = Saheeh International (English)
-  &fields=text_uthmani       // clean Uthmani script
+  ?language=ar
+  &fields=text_uthmani
   &per_page=50
   &page=1
-→ { verses: [{ id, verse_key, text_uthmani, translations: [...] }] }
+→ { verses: [{ id, verse_number, verse_key, text_uthmani }],
+    pagination: { total_pages, ... } }
 
-// Get all reciters
-GET /audio/reciters?language=en
-→ { reciters: [{ id, name, style, ... }] }
+// All reciters
+GET /resources/recitations
+→ { recitations: [{ id, reciter_name, style, translated_name }] }
 
-// Get audio file URLs for a reciter + chapter
-GET /audio/reciters/{reciter_id}/audio_files
-  ?chapter_number={surah_number}
-  &segments=true             // returns per-ayah timestamps
-→ { audio_files: [{ verse_key, url, duration, ... }] }
+// Audio files for a reciter + chapter (paginated)
+GET /recitations/{reciter_id}/by_chapter/{chapter_id}
+  ?per_page=50&page=1
+→ { audio_files: [{ verse_key, url }],
+    pagination: { total_pages } }
+
+// Tafsir for a single verse
+GET /tafsirs/{tafsir_id}/by_ayah/{chapter}:{verse}
+  // tafsir_id 16 = Ibn Kathir (English)
+→ { tafsir: { text } }
 ```
 
-**Verse audio CDN (fallback):**
+**Audio CDN:** Relative URLs from `/recitations/` are resolved to:
 
 ```
-https://cdn.islamic.network/quran/audio/128/{reciter_id}/{verse_number}.mp3
+https://verses.quran.com/{relative_url}
 ```
 
-Example reciters on islamic.network: `ar.alafasy`, `ar.minshawi`, `ar.husary`
+**Retry strategy:** All API calls wrapped in exponential-backoff retry (3 attempts: 1s, 2s, 4s) for transient network errors (`ECONNRESET`, `ETIMEDOUT`, etc.).
 
-### 5.2 Background Videos — Pixabay API
+### 6.2 Pixabay API
 
-**Free tier:** 5,000 requests/hour. API key is stored in `.env.local` — never hardcoded or committed. Get a free key at pixabay.com/api/docs/.
-
-**Environment setup:**
-
-```bash
-# .env.local  ← git-ignored, never committed
-NEXT_PUBLIC_PIXABAY_API_KEY=your_key_here
-```
-
-```bash
-# .env.example  ← committed to repo, no real values
-NEXT_PUBLIC_PIXABAY_API_KEY=
-```
+**Free tier:** 5,000 requests/hour. API key stored in `PIXABAY_API_KEY` env var (server-side only).
+Get a free key at [pixabay.com/api/docs](https://pixabay.com/api/docs/).
 
 ```ts
-// lib/api/pixabay.ts
-const PIXABAY_KEY = process.env.NEXT_PUBLIC_PIXABAY_API_KEY
-if (!PIXABAY_KEY)
-  throw new Error("Missing NEXT_PUBLIC_PIXABAY_API_KEY — see .env.example")
-```
-
-```ts
-// Search videos
 GET https://pixabay.com/api/videos/
-  ?key={API_KEY}
-  &q={query}            // e.g. "nature", "sky", "desert", "water"
+  ?key={PIXABAY_API_KEY}
+  &q={theme}           // e.g. "nature", "sky", "desert", "water"
   &video_type=all
   &per_page=20
   &safesearch=true
-→ {
-    hits: [{
-      id,
-      tags,
-      videos: {
-        large:  { url, width, height, size },   // 1920px
-        medium: { url, ... },                    // 1280px
-        small:  { url, ... },                    // 960px
-        tiny:   { url, ... }                     // 640px
-      }
-    }]
-  }
+→ { hits: [{ videos: { large: { url }, medium: { url }, small: { url } } }] }
 ```
 
-**Recommended default queries to preload as categories:**
-`nature`, `sky clouds`, `rain water`, `desert sand`, `mountains`, `ocean waves`, `forest`, `light bokeh`, `islamic architecture`
+**Predefined themes (user selects from dropdown):**
 
-### 5.3 Fallback Background — Static Gradients
+| Theme Label          | Query                         |
+| -------------------- | ----------------------------- |
+| Nature               | `nature`                      |
+| Sky & Clouds         | `sky clouds`                  |
+| Rain & Water         | `rain water`                  |
+| Desert               | `desert sand`                 |
+| Mountains            | `mountains`                   |
+| Ocean                | `ocean waves`                 |
+| Forest               | `forest`                      |
+| Light Bokeh          | `light bokeh`                 |
+| Islamic Architecture | `islamic architecture mosque` |
+| Night Stars          | `night stars galaxy`          |
 
-When Pixabay is unavailable or user skips it, offer 8 built-in CSS gradient presets rendered directly onto canvas (no external request).
+The server picks a **random video** from the results for variety on each generation.
 
-### 5.4 Fonts (all free, self-hostable via Google Fonts or direct download)
+### 6.3 Fonts (self-hosted in `/public/fonts/`)
 
-| Font Name              | Source                 | Style                        |
-| ---------------------- | ---------------------- | ---------------------------- |
-| **Amiri Bold**         | Google Fonts           | Classic Naskh — most popular |
-| **Scheherazade New**   | Google Fonts (SIL OFL) | Traditional Naskh            |
-| **Noto Naskh Arabic**  | Google Fonts           | Clean, modern Naskh          |
-| **Lateef**             | Google Fonts (SIL OFL) | Sindhi/Nastaliq-adjacent     |
-| **Noto Nastaliq Urdu** | Google Fonts           | Nastaliq calligraphy style   |
+All fonts are free and open-source (SIL OFL license):
 
-Load at runtime using `FontFace` API:
+| Font Name          | File                           | Style                                 |
+| ------------------ | ------------------------------ | ------------------------------------- |
+| Amiri              | `Amiri.ttf` / `Amiri-Bold.ttf` | Classic Naskh — best for Quranic text |
+| Noto Naskh Arabic  | `NotoNaskhArabic.ttf`          | Clean, modern Naskh                   |
+| Scheherazade New   | `ScheherazadeNew-Regular.ttf`  | Traditional Naskh                     |
+| Lateef             | `Lateef-Regular.ttf`           | Sindhi-style Naskh                    |
+| Noto Nastaliq Urdu | `NotoNastaliqUrdu-Regular.ttf` | Nastaliq calligraphy                  |
 
-```ts
-const font = new FontFace("Amiri", "url(/fonts/Amiri-Bold.woff2)")
-await font.load()
-document.fonts.add(font)
-```
-
-Store `.woff2` files in `/public/fonts/` so they are served statically.
+**Important:** Only `Amiri.ttf`, `Amiri-Bold.ttf`, and `NotoNaskhArabic.ttf` contain Arabic Presentation Forms B glyphs (FE70–FEFF) required for the built-in reshaper. The others rely on HarfBuzz (production/Docker) for correct Arabic shaping.
 
 ---
 
-## 6. Feature Spec
+## 7. Feature Spec
 
-### 6.1 Configuration Panel
+### 7.1 Configuration Panel
 
 #### Quran Settings
 
-- **Surah selector** — searchable dropdown of all 114 surahs (Arabic name + transliteration + verse count)
-- **Start Ayah** — number input (1 to surah.verses_count)
-- **End Ayah** — number input (start + 1 to min(start + 9, surah.verses_count)) — enforced max 10 verses
-- **Reciter** — searchable dropdown from `/audio/reciters`; show reciter style (Murattal, Mujawwad, etc.)
-- **Show Translation** — toggle; language selector (default: English / Saheeh International)
-- **Show Verse Number** — toggle (renders badge e.g. ﴿١٢٣﴾)
+- **Surah** — searchable dropdown (Arabic name + transliteration + verse count)
+- **Start Ayah** — number input; min: 1, max: `surah.verses_count`
+- **End Ayah** — number input; min: `startAyah + 1`, max: `min(startAyah + 9, surah.verses_count)` — **hard cap: 10 verses**
+- **Reciter** — searchable dropdown from `GET /resources/recitations`; shows style (Murattal / Mujawwad)
+- **Include Tafsir** — toggle; shows Ibn Kathir English tafsir below each verse (truncated to 120 chars, 2 lines)
+- **Verse Number Badge** — toggle; renders ﴿N﴾ below each verse in gold
 
 #### Video Settings
 
-- **Aspect Ratio**
-
-| Label | Resolution  | Use Case                |
+| Ratio | Resolution  | Platform                |
 | ----- | ----------- | ----------------------- |
 | 16:9  | 1920 × 1080 | YouTube                 |
 | 9:16  | 1080 × 1920 | Reels / Shorts / TikTok |
 | 1:1   | 1080 × 1080 | Instagram Post          |
-| 4:5   | 1080 × 1350 | Instagram Feed Portrait |
-
-- **Duration per verse** — slider: 3s – 15s per ayah (default: auto = audio duration + 1s padding)
+| 4:5   | 1080 × 1350 | Instagram Feed          |
 
 #### Background Settings
 
-- **Type** — Video (Pixabay) or Gradient (built-in)
-- **Search bar** (Video type) — search Pixabay; shows thumbnail grid
-- **Gradient picker** (Gradient type) — 8 presets + custom color stops
-- **Background opacity** — 0–100% (used to darken video for text legibility)
-- **Blur** — 0–20px on background
+- **Theme** — dropdown of 10 Pixabay categories (server fetches + picks random video)
+- **Dim Opacity** — slider 0–1 (default 0.5); controls black overlay `drawbox=c=black@{opacity}`
 
 #### Style Settings
 
-- **Font** — dropdown of 5 Quranic fonts
-- **Font size** — slider (relative, adapts to canvas dimensions)
-- **Text color** — color picker (default: white)
-- **Text shadow** — toggle + shadow color + blur radius
-- **Text alignment** — center (default), right
-- **Overlay gradient** — linear gradient from bottom (helps text contrast); toggle + intensity
+- **Font** — dropdown of 5 Quranic fonts (value = filename e.g. `Amiri-Bold.ttf`)
+- **Adaptive font size** — auto-calculated from video width and verse visible character count (no manual input needed)
 
-#### Effects Settings
+### 7.2 Video Generation & Export
 
-- **Ken Burns** — slow zoom in/out or pan on background video; toggle + direction
-- **Verse transition** — None, Fade, Slide Up
-- **Text animation** — None, Fade In, Word-by-Word Appear
-- **Vignette** — subtle dark edges; toggle + intensity
-- **Particle overlay** — optional subtle floating particles (dots/sparkles); toggle + density
-
-### 6.2 Live Preview
-
-- A `<canvas>` element renders the current verse in real time
-- Shows selected font, background, effects at correct aspect ratio
-- "Play Preview" button plays audio + animates canvas for the selected verse range
-- Previous / Next buttons to scrub between verses in range
-
-### 6.3 Video Generation & Export
-
-**Generation pipeline (all in-browser):**
+**Server-side pipeline (`POST /api/generate`):**
 
 ```
-1. Prefetch all assets
-   ├─ Fetch verse texts from qurancdn API
-   ├─ Fetch audio URLs per verse (qurancdn or islamic.network CDN)
-   ├─ Preload all audio as ArrayBuffers via fetch()
-   ├─ Fetch selected Pixabay video → load into <video> element
-   └─ Ensure all fonts are loaded via FontFace API
+1. Validate request body
+   ├─ Required: chapter, from, to, reciterId
+   └─ Guard: to - from > 10  →  400 error
 
-2. Setup canvas
-   ├─ Create OffscreenCanvas (or visible canvas) at target resolution
-   └─ Create AudioContext
+2. Fetch verse texts
+   └─ GET /verses/by_chapter/{chapter}?fields=text_uthmani (paginated)
 
-3. For each verse (index i):
-   ├─ Decode audio[i] via AudioContext.decodeAudioData()
-   ├─ Play audio[i] through AudioContext → MediaStreamDestination node
-   ├─ Render loop (requestAnimationFrame or setInterval at 30fps):
-   │   ├─ Draw background frame (video currentTime advances, or gradient)
-   │   ├─ Apply Ken Burns transform (CSS-like matrix on canvas)
-   │   ├─ Draw vignette overlay
-   │   ├─ Draw gradient overlay
-   │   ├─ Compute text animation progress (0→1 based on elapsed / duration)
-   │   ├─ Draw Arabic text (RTL, centered, with shadow)
-   │   ├─ Draw translation text (if enabled)
-   │   └─ Draw verse number badge
-   └─ Wait for audio[i] to finish → crossfade transition → next verse
+3. Fetch audio URLs
+   └─ GET /recitations/{reciterId}/by_chapter/{chapter} (paginated)
+      └─ Resolve to: https://verses.quran.com/{url}
 
-4. Capture streams
-   ├─ canvas.captureStream(30)           → videoStream
-   ├─ AudioContext destination.stream    → audioStream
-   └─ new MediaStream([videoTrack, audioTrack]) → combinedStream
+4. Fetch tafsir (if enabled)
+   └─ GET /tafsirs/16/by_ayah/{chapter}:{verse}  per verse
+      └─ Strip HTML tags, truncate to 200 chars
 
-5. MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus' })
-   ├─ Collect Blob chunks
-   └─ On stop → assemble Blob
+5. Get background video
+   └─ GET Pixabay API with theme query → pick random hit → use medium video URL
 
-6. (Optional) FFmpeg.wasm transcode
-   ├─ @ffmpeg/ffmpeg loads WASM (~32MB, cached after first load)
-   ├─ ffmpeg.writeFile('input.webm', new Uint8Array(webmBlob))
-   ├─ ffmpeg.exec(['-i','input.webm','-c:v','libx264','-c:a','aac','output.mp4'])
-   └─ Read output.mp4 → download
+6. generateVideo()  (lib/ffmpeg.ts)
+   ├─ Download background video      → tmpDir/background.mp4
+   ├─ Download all verse audio        → tmpDir/audio_0.mp3 … audio_N.mp3
+   ├─ Probe each audio duration via ffprobe
+   ├─ Concat audio via ffmpeg concat demuxer  → tmpDir/merged_audio.mp3
+   ├─ Build drawtext filter chain:
+   │   For each verse:
+   │   ├─ Prepare Arabic text (HarfBuzz or reshape+reverse pipeline)
+   │   ├─ Split into lines (max chars per line scaled to video width)
+   │   ├─ Adaptive font size (based on video width + visible char count)
+   │   ├─ Fade-in / fade-out alpha expressions (0.5s in, 0.4s out)
+   │   ├─ drawtext for each line  (white, shadow, border)
+   │   ├─ drawtext for verse badge ﴿N﴾  (gold #b8922f)
+   │   └─ drawtext for tafsir lines  (if enabled, 2 lines max)
+   ├─ Write filter chain to tmpDir/filters.txt (avoids shell length limits)
+   └─ Run FFmpeg:
+       input 0: background.mp4 (stream_loop -1)
+       input 1: merged_audio.mp3
+       filter_complex_script: filters.txt
+       video: libx264, preset ultrafast, crf 28, maxrate 1500k
+       audio: aac, 128k
+       output: tmpDir/output.mp4
 
-7. Offer download
-   ├─ WebM (fast, no transcode)
-   └─ MP4 (requires FFmpeg WASM transcode, slower)
+7. Stream output.mp4 as ReadableStream response
+   ├─ Content-Type: video/mp4
+   ├─ Content-Disposition: attachment; filename="quran_{chapter}_{from}-{to}.mp4"
+   └─ Content-Length: file size
+      └─ cleanupTempDir 3s after stream ends
 ```
 
-**FFmpeg.wasm Setup (Next.js):**
+**Arabic text rendering strategy:**
+
+```
+Does system FFmpeg have HarfBuzz?
+  YES (Docker / production / Render.com)
+    → Pass raw Unicode text to drawtext + text_shaping=1
+    → HarfBuzz handles: connections, diacritics, ligatures, bidi
+
+  NO (local dev — @ffmpeg-installer/ffmpeg binary)
+    → Font has Presentation Forms B glyphs? (Amiri, NotoNaskhArabic)
+        YES → normalizeArabicText → reshapeArabicText → reverseArabicClusters
+        NO  → normalizeArabicText → reverseArabicClusters only
+```
+
+**Adaptive font size formula:**
 
 ```ts
-// next.config.ts — required for SharedArrayBuffer (FFmpeg WASM dependency)
-const nextConfig = {
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
-        ],
-      },
-    ]
-  },
-}
+// Base size scaled to video width
+width >= 3840 → base = 156   // 4K
+width >= 2560 → base = 104   // 1440p
+width >= 1920 → base = 78    // 1080p
+width >= 1280 → base = 52    // 720p
+width >= 720  → base = 42    // SD
+else          → base = 34
+
+// Scale down by visible character count (diacritics excluded)
+visibleChars < 30  → base × 1.00
+visibleChars < 60  → base × 0.82
+visibleChars < 100 → base × 0.68
+visibleChars < 150 → base × 0.56
+else               → base × 0.48
 ```
 
 ---
 
-## 7. Architecture
+## 8. Project Structure
 
 ```
 ayahvid/
 ├── app/
-│   ├── layout.tsx              # COOP/COEP headers set in next.config.ts
-│   ├── page.tsx                # Main editor page
-│   └── api/                    # (empty — no backend needed)
+│   ├── layout.tsx
+│   ├── page.tsx                    # Main editor UI
+│   └── api/
+│       └── generate/
+│           └── route.ts            # POST handler — video generation pipeline
 │
 ├── components/
 │   ├── editor/
-│   │   ├── ConfigPanel.tsx     # Left sidebar: all settings
-│   │   ├── PreviewCanvas.tsx   # Center: canvas preview
-│   │   ├── VerseTimeline.tsx   # Bottom: verse scrubber
-│   │   └── ExportModal.tsx     # Export progress + download
+│   │   ├── ConfigPanel.tsx         # Full settings sidebar
+│   │   ├── GenerateButton.tsx      # Triggers POST, shows progress
+│   │   └── DownloadLink.tsx        # Receives blob URL → <a download>
 │   │
 │   ├── panels/
-│   │   ├── QuranPanel.tsx      # Surah, ayah range, reciter
-│   │   ├── VideoPanel.tsx      # Aspect ratio, duration
-│   │   ├── BackgroundPanel.tsx # Pixabay search + gradient picker
-│   │   ├── StylePanel.tsx      # Font, color, overlay
-│   │   └── EffectsPanel.tsx    # Ken Burns, transitions, particles
+│   │   ├── QuranPanel.tsx          # Surah, ayah range, reciter, toggles
+│   │   ├── VideoPanel.tsx          # Aspect ratio selector
+│   │   ├── BackgroundPanel.tsx     # Theme dropdown + dim opacity slider
+│   │   └── StylePanel.tsx          # Font picker
 │   │
-│   └── ui/                     # shadcn/ui components
+│   └── ui/                         # shadcn/ui generated components
 │
 ├── lib/
-│   ├── api/
-│   │   ├── quran.ts            # Quran.com API wrappers + types
-│   │   ├── pixabay.ts          # Pixabay API wrapper + types
-│   │   └── audio.ts            # Audio fetch + decode helpers
-│   │
-│   ├── canvas/
-│   │   ├── renderer.ts         # Core frame render function
-│   │   ├── textLayout.ts       # Arabic text measurement + wrap
-│   │   ├── effects.ts          # Ken Burns, vignette, particles
-│   │   └── transitions.ts      # Fade, slide-up crossfade logic
-│   │
-│   ├── video/
-│   │   ├── recorder.ts         # MediaRecorder pipeline
-│   │   ├── ffmpegWorker.ts     # FFmpeg WASM transcode (web worker)
-│   │   └── export.ts           # Orchestrates full export flow
-│   │
-│   └── store/
-│       ├── editorStore.ts      # Zustand: all config state
-│       └── assetStore.ts       # Zustand: fetched API data cache
-│
-├── hooks/
-│   ├── useQuranData.ts         # SWR-like fetcher for chapters/verses
-│   ├── usePixabaySearch.ts     # Debounced Pixabay video search
-│   ├── useAudioPlayer.ts       # Preview playback with Web Audio API
-│   └── useExport.ts            # Export pipeline state + progress
+│   ├── ffmpeg.ts                   # generateVideo() + Arabic reshaper + cleanupTempDir
+│   ├── quran-api.ts                # getChapters, getVerses, getAudioFiles,
+│   │                               # getReciters, getTafsir, getAudioUrl + retry wrapper
+│   └── pixabay.ts                  # getRandomVideoUrl(theme) — server-only
 │
 ├── public/
-│   ├── fonts/
-│   │   ├── Amiri-Bold.woff2
-│   │   ├── ScheherazadeNew-Bold.woff2
-│   │   ├── NotoNaskhArabic-Bold.woff2
-│   │   ├── Lateef-SemiBold.woff2
-│   │   └── NotoNastaliqUrdu-Bold.woff2
-│   └── ffmpeg/                 # FFmpeg WASM core files (copied from @ffmpeg/core)
-│       ├── ffmpeg-core.js
-│       ├── ffmpeg-core.wasm
-│       └── ffmpeg-core.worker.js
+│   └── fonts/
+│       ├── Amiri.ttf
+│       ├── Amiri-Bold.ttf
+│       ├── NotoNaskhArabic.ttf
+│       ├── ScheherazadeNew-Regular.ttf
+│       ├── Lateef-Regular.ttf
+│       └── NotoNastaliqUrdu-Regular.ttf
 │
 ├── types/
-│   ├── quran.ts
-│   ├── pixabay.ts
-│   └── editor.ts
+│   ├── quran.ts                    # Chapter, Reciter, Verse, AudioFile
+│   └── editor.ts                   # AspectRatio, GenerateRequest, Theme
 │
-└── next.config.ts              # COOP/COEP headers for SharedArrayBuffer
+├── .env.local                      # ← git-ignored (real keys)
+├── .env.example                    # ← committed (empty values)
+├── Dockerfile                      # system FFmpeg + HarfBuzz for production
+└── next.config.ts
 ```
 
 ---
 
-## 8. Data Models
+## 9. Data Models
 
 ```ts
 // types/editor.ts
@@ -400,227 +388,261 @@ export const RESOLUTIONS: Record<AspectRatio, { w: number; h: number }> = {
 }
 
 export type QuranicFont =
-  | "Amiri"
-  | "Scheherazade New"
-  | "Noto Naskh Arabic"
-  | "Lateef"
-  | "Noto Nastaliq Urdu"
+  | "Amiri.ttf"
+  | "Amiri-Bold.ttf"
+  | "NotoNaskhArabic.ttf"
+  | "ScheherazadeNew-Regular.ttf"
+  | "Lateef-Regular.ttf"
+  | "NotoNastaliqUrdu-Regular.ttf"
 
-export type VerseTransition = "none" | "fade" | "slideUp"
-export type TextAnimation = "none" | "fadeIn" | "wordByWord"
+export type Theme =
+  | "nature"
+  | "sky clouds"
+  | "rain water"
+  | "desert sand"
+  | "mountains"
+  | "ocean waves"
+  | "forest"
+  | "light bokeh"
+  | "islamic architecture mosque"
+  | "night stars galaxy"
 
-export interface EditorConfig {
-  // Quran
-  chapterId: number
-  startAyah: number
-  endAyah: number
+export interface GenerateRequest {
+  chapter: number
+  from: number
+  to: number // max: from + 9
   reciterId: number
-  showTranslation: boolean
-  translationId: number // 131 = Saheeh International
-  showVerseNumber: boolean
+  theme: Theme
+  includeTafsir: boolean
+  dimOpacity: number // 0–1, default 0.5
+  videoWidth: number
+  videoHeight: number
+  fontFile: QuranicFont
+}
+```
 
-  // Video
-  aspectRatio: AspectRatio
-  durationPerVerse: number | "auto" // seconds
+```ts
+// types/quran.ts
 
-  // Background
-  backgroundType: "video" | "gradient"
-  pixabayVideoUrl: string | null
-  gradientPreset: number // 0–7 for built-in presets
-  backgroundDimness: number // 0–1
-  backgroundBlur: number // px
+export interface Chapter {
+  id: number
+  name_simple: string
+  name_arabic: string
+  verses_count: number
+  revelation_place: string
+  translated_name: { name: string; language_name: string }
+}
 
-  // Style
-  font: QuranicFont
-  fontSize: number // base size, scaled to canvas
-  textColor: string
-  textShadow: boolean
-  textShadowColor: string
-  textShadowBlur: number
-  overlayGradient: boolean
-  overlayIntensity: number
+export interface Reciter {
+  id: number
+  reciter_name: string
+  style: string | null
+  translated_name: { name: string; language_name: string }
+}
 
-  // Effects
-  kenBurns: boolean
-  kenBurnsDirection: "in" | "out" | "pan-left" | "pan-right"
-  verseTransition: VerseTransition
-  textAnimation: TextAnimation
-  vignette: boolean
-  vignetteIntensity: number
-  particles: boolean
-  particleDensity: number
+export interface Verse {
+  id: number
+  verse_number: number
+  verse_key: string
+  text_uthmani: string
+}
+
+export interface AudioFile {
+  verse_key: string
+  url: string
 }
 ```
 
 ---
 
-## 9. Key Implementation Notes
+## 10. package.json
 
-### Arabic Text Rendering on Canvas
-
-Modern browsers (Chrome 95+, Firefox 110+, Safari 16.4+) handle Arabic shaping and bidirectional text natively in `canvas.fillText()` when:
-
-1. The font is loaded via `FontFace` API (not just CSS `@font-face`) before drawing
-2. The canvas context direction is set: `ctx.direction = 'rtl'`
-3. Text is aligned center: `ctx.textAlign = 'center'`
-
-```ts
-ctx.direction = "rtl"
-ctx.textAlign = "center"
-ctx.font = `${fontSize}px 'Amiri'`
-ctx.fillStyle = textColor
-ctx.fillText(verse.text_uthmani, canvasWidth / 2, y)
-```
-
-For multi-line wrapping, measure word widths and break manually — Arabic words should not be split mid-word.
-
-### Ken Burns Effect
-
-Apply a slow `ctx.setTransform()` scale/translate on the background draw call:
-
-```ts
-const scale = 1 + progress * 0.05 // 5% zoom over verse duration
-const offsetX = (canvasWidth * (scale - 1)) / 2
-const offsetY = (canvasHeight * (scale - 1)) / 2
-ctx.save()
-ctx.setTransform(scale, 0, 0, scale, -offsetX, -offsetY)
-ctx.drawImage(videoEl, 0, 0, canvasWidth, canvasHeight)
-ctx.restore()
-```
-
-### Audio + Video Sync via Web Audio API
-
-```ts
-const audioCtx = new AudioContext()
-const dest = audioCtx.createMediaStreamDestination()
-
-// For each verse:
-const buffer = await audioCtx.decodeAudioData(arrayBuffer)
-const source = audioCtx.createBufferSource()
-source.buffer = buffer
-source.connect(dest)
-source.start()
-
-// Combine with canvas video track:
-const canvasStream = canvas.captureStream(30)
-const combinedStream = new MediaStream([
-  canvasStream.getVideoTracks()[0],
-  dest.stream.getAudioTracks()[0],
-])
-```
-
-### FFmpeg WASM — Loading Strategy
-
-- Load lazily, only when user clicks "Export as MP4"
-- Show download size warning (~32MB on first load)
-- Cache in browser (the WASM binary is served from `/public/ffmpeg/` so it's same-origin, not CDN)
-- Run in a Web Worker to avoid blocking the main thread
-
-### Pixabay API Key — Environment Variables
-
-Load from `process.env.NEXT_PUBLIC_PIXABAY_API_KEY` set in `.env.local`. The `.env.local` file is git-ignored by default in every Next.js project — never commit real keys. The repo ships a `.env.example` with empty values so contributors know what to set. Never log the key value anywhere in the codebase.
-
----
-
-## 10. Packages
-
-Versions verified from npm registry as of April 2026.
+Versions verified from npm registry — April 2026.
 
 ```json
 {
+  "name": "ayahvid",
+  "version": "0.1.0",
+  "description": "Open-source Quran video generator — Next.js + fluent-ffmpeg",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3034",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
   "dependencies": {
-    "next": "^16.2.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "typescript": "^5.8.3",
-    "framer-motion": "^12.38.0",
-    "zustand": "^5.0.12",
-    "@ffmpeg/ffmpeg": "^0.12.15",
-    "@ffmpeg/util": "^0.12.2"
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/uuid": "^11.0.0",
+    "axios": "^1.15.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "lucide-react": "^1.8.0",
+    "next": "16.2.4",
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "shadcn": "^4.2.0",
+    "tailwind-merge": "^3.5.0",
+    "tw-animate-css": "^1.4.0",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
-    "tailwindcss": "^4.2.4",
-    "@tailwindcss/vite": "^4.2.4",
-    "@types/node": "^22.15.3",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2"
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^10.2.0",
+    "eslint-config-next": "16.2.4",
+    "prettier": "latest",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2"
   }
 }
 ```
 
-shadcn/ui components to add:
-`button`, `slider`, `select`, `input`, `switch`, `badge`, `dialog`, `progress`, `tabs`, `tooltip`, `scroll-area`, `separator`, `popover`, `command` (for searchable selects)
+**Changes from your original `package.json`:**
+
+- `uuid`: `^13.0.0` → **`^14.0.0`** (latest on npm as of April 2026)
+- `axios`: `^1.15.0` → **`^1.15.1`** (latest patch)
+- `next` / `eslint-config-next`: `16.2.2` → **`16.2.4`**
+- `arabic-reshaper` **removed** — replaced by the built-in reshaper in `lib/ffmpeg.ts` (no external dep needed, already in your uploaded code)
+- `phosphor-react` **removed** — replaced by `lucide-react` which is already included
+- `postcss` **removed** — no longer needed standalone; `@tailwindcss/postcss` covers it for Tailwind v4
+- `prettier` **added** — referenced in `format` script but was missing from deps
 
 ---
 
-## 11. UI Layout
+## 11. next.config.ts
+
+```ts
+import type { NextConfig } from "next"
+
+const nextConfig: NextConfig = {
+  serverExternalPackages: ["fluent-ffmpeg"], // don't bundle — keep as native require
+}
+
+export default nextConfig
+```
+
+No COOP/COEP headers needed — those are only required for `SharedArrayBuffer` (browser FFmpeg WASM). Since all rendering is server-side, no special browser headers are needed.
+
+---
+
+## 12. Dockerfile (Production)
+
+```dockerfile
+FROM node:22-slim
+
+# Install system FFmpeg with HarfBuzz (enables text_shaping=1 for native Arabic)
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+RUN npm run build
+
+EXPOSE 3034
+CMD ["npm", "start"]
+```
+
+System FFmpeg on Debian/Ubuntu includes HarfBuzz. The app auto-detects this via:
+
+```ts
+const conf = execSync("ffmpeg -buildconf 2>&1", { encoding: "utf8" })
+const hasHarfBuzz = conf.includes("harfbuzz")
+```
+
+---
+
+## 13. Deployment
+
+| Platform       | Supported | Notes                                                                                          |
+| -------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| **Render.com** | ✅        | Use Docker deploy; free tier available                                                         |
+| **Railway**    | ✅        | Docker or Nixpacks; generous free tier                                                         |
+| **Fly.io**     | ✅        | Docker; pay-as-you-go                                                                          |
+| **Vercel**     | ⚠️        | Serverless functions have 50MB size limit and are fragile for video streaming; not recommended |
+| **Local dev**  | ✅        | `@ffmpeg-installer/ffmpeg` used automatically; no system install needed                        |
+
+---
+
+## 14. UI Layout
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  AyahVid                                          [?] [GitHub]  │
-├──────────────────┬──────────────────────────┬───────────────────┤
-│                  │                          │                   │
-│  CONFIG PANEL    │     CANVAS PREVIEW       │   STYLE / FX      │
-│  ─────────────   │   ───────────────────    │   ───────────     │
-│  📖 Quran        │                          │   🎨 Font         │
-│   Surah select   │   ┌──────────────────┐   │   🌈 Colors       │
-│   Ayah range     │   │                  │   │   ✨ Effects      │
-│   Reciter        │   │  Canvas renders  │   │   🎞 Transition   │
-│                  │   │  here (live)     │   │                   │
-│  📐 Dimensions   │   │                  │   │                   │
-│   16:9 9:16      │   └──────────────────┘   │                   │
-│   1:1  4:5       │                          │                   │
-│                  │   [◀ Prev] [▶ Play] [Next▶]                  │
-│  🖼 Background   │                          │                   │
-│   Video search   │   Verse 3 / 7            │                   │
-│   Gradient       │                          │                   │
-│                  │                          │                   │
-├──────────────────┴──────────────────────────┴───────────────────┤
+│  ☪ AyahVid                                        [?] [GitHub]  │
+├────────────────────┬────────────────────────────────────────────┤
+│                    │                                            │
+│  📖 QURAN          │   OUTPUT INFO                              │
+│  ─────────────     │   ─────────────────────────────────────   │
+│  Surah             │                                            │
+│  [Al-Baqarah  ▾]   │   Surah: Al-Baqarah (2)                   │
+│                    │   Verses: 1 – 5  (5 verses)               │
+│  Start   End       │   Reciter: Mishary Al-Afasy               │
+│  [  1 ]  [ 5 ]     │   Resolution: 1920 × 1080 (16:9)          │
+│  max 10 verses     │   Font: Amiri Bold                        │
+│                    │   Background: Nature                       │
+│  Reciter           │                                            │
+│  [Al-Afasy    ▾]   │                                            │
+│                    │                                            │
+│  ☑ Tafsir          │                                            │
+│  ☑ Verse badge     │                                            │
+│                    │                                            │
+│  📐 DIMENSIONS     │                                            │
+│  ◉ 16:9  ○ 9:16    │                                            │
+│  ○ 1:1   ○ 4:5     │                                            │
+│                    │                                            │
+│  🖼 BACKGROUND     │                                            │
+│  [Nature      ▾]   │                                            │
+│                    │                                            │
+│  Dim: ████░  0.5   │                                            │
+│                    │                                            │
+│  🔤 FONT           │                                            │
+│  [Amiri Bold  ▾]   │                                            │
+│                    │                                            │
+├────────────────────┴────────────────────────────────────────────┤
 │                                                                 │
-│  ████████████████████████████░░░░░  Generating… (4/7 verses)   │
-│                                                                 │
-│  [⬇ Export WebM — Fast]     [⬇ Export MP4 — ~32MB first load]  │
+│   [  ▶  Generate & Download MP4  ]    ≈ 30–90s depending on length  │
+│   ████████████████████░░░░░░░░░░░  Rendering…                  │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 12. Milestones
+## 15. Milestones
 
-| #   | Milestone                 | Deliverables                                                                       |
-| --- | ------------------------- | ---------------------------------------------------------------------------------- |
-| M1  | **Foundation**            | Next.js 15 + TS scaffold, fonts in /public, shadcn/ui configured, Zustand stores   |
-| M2  | **Quran API integration** | Surah list, verse fetch, reciter list, audio URL resolution, translation fetch     |
-| M3  | **Canvas Renderer**       | Background draw (video + gradient), Arabic text (RTL), overlay, verse number badge |
-| M4  | **Preview & Playback**    | Live canvas preview, audio playback via Web Audio API, prev/next verse navigation  |
-| M5  | **Effects**               | Ken Burns, vignette, fade/slide transitions, text animation, particles             |
-| M6  | **Pixabay Integration**   | Search UI, thumbnail grid, video selection and load into `<video>` element         |
-| M7  | **Export — WebM**         | MediaRecorder pipeline, audio+video stream combine, Blob download                  |
-| M8  | **Export — MP4**          | FFmpeg WASM integration, transcode WebM→MP4, progress reporting                    |
-| M9  | **Polish**                | Loading states, error handling, keyboard shortcuts, responsive layout              |
-| M10 | **Open Source Launch**    | README, CONTRIBUTING.md, LICENSE (MIT), demo GIF, GitHub Actions CI                |
-
----
-
-## 13. Open Source Setup
-
-- **License:** MIT
-- **Repo structure:** monorepo (single Next.js app)
-- **Demo:** Deploy to Vercel (free tier, static/edge, no server needed)
-  - Note: Vercel doesn't require a backend, but COOP/COEP headers must be set in `next.config.ts` — Vercel supports this
-- **Contributing:** Issues for each milestone as GitHub Projects board
-- **README sections:** Demo GIF, Quick Start, API Key Setup (Pixabay), Font Attribution, Tech Stack, Contributing
+| #   | Milestone              | Deliverables                                                                           |
+| --- | ---------------------- | -------------------------------------------------------------------------------------- |
+| M1  | **Scaffold**           | Next.js 16 + TS + Tailwind v4 + shadcn setup; fonts in `/public/fonts`; `.env.example` |
+| M2  | **Quran API**          | `lib/quran-api.ts` — chapters, verses, reciters, audio, tafsir with retry wrapper      |
+| M3  | **Pixabay API**        | `lib/pixabay.ts` — theme search, random video picker; `PIXABAY_API_KEY` from env       |
+| M4  | **FFmpeg Core**        | `lib/ffmpeg.ts` — Arabic reshaper, drawtext builder, audio concat, render pipeline     |
+| M5  | **API Route**          | `app/api/generate/route.ts` — full POST handler, file streaming, cleanup               |
+| M6  | **UI — Config Panel**  | Surah/ayah/reciter selectors, aspect ratio, theme, font, opacity controls              |
+| M7  | **UI — Generate Flow** | Submit button, loading state, error display, download trigger                          |
+| M8  | **Polish**             | Input validation, empty states, error toasts, responsive layout                        |
+| M9  | **Docker**             | `Dockerfile` with system FFmpeg; verify HarfBuzz Arabic shaping in prod                |
+| M10 | **Open Source Launch** | `README.md`, `CONTRIBUTING.md`, `LICENSE` (MIT), demo GIF, GitHub Actions CI           |
 
 ---
 
-## 14. Limitations & Known Constraints
+## 16. Known Constraints & Mitigations
 
-| Issue                                                                      | Mitigation                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `MediaRecorder` outputs WebM only on Chromium; Safari outputs MP4 natively | Detect browser and skip FFmpeg transcode on Safari                             |
-| FFmpeg WASM requires `SharedArrayBuffer` → needs COOP/COEP headers         | Set in `next.config.ts`; note this disables some third-party iframes           |
-| Pixabay video is cross-origin → canvas `drawImage` taints the canvas       | Pixabay video URLs support CORS; add `video.crossOrigin = 'anonymous'`         |
-| Large resolutions (1920×1080) may be slow in browser                       | Add a "fast preview" mode at 50% resolution; only render full-res on export    |
-| Arabic font rendering in Canvas varies across OS/browser                   | Test matrix: Chrome/Windows, Chrome/Mac, Safari/Mac, Firefox/Linux             |
-| Max 10 verses → max ~15 min audio possible                                 | MediaRecorder handles this fine; FFmpeg WASM may need more RAM for long videos |
+| Constraint                                                   | Mitigation                                                                    |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `fluent-ffmpeg` v2.1.3 is unmaintained (no new npm releases) | Stable API, widely used in production; types via `@types/fluent-ffmpeg`       |
+| Vercel serverless not suitable                               | Deploy on Render.com, Railway, or Fly.io with Dockerfile                      |
+| `@ffmpeg-installer/ffmpeg` (local) lacks HarfBuzz            | Built-in reshape+reverse pipeline handles dev correctly for Amiri + NotoNaskh |
+| Pixabay cross-origin video download                          | Server downloads the video directly — no browser CORS issue                   |
+| Long generation time (30–90s per video)                      | `maxDuration = 300`; show client-side spinner; v2 can add SSE progress        |
+| Temp files accumulate on crash                               | `cleanupTempDir` called in both success and error paths; UUID-named temp dirs |
+| Max 10 verses = potentially long audio                       | FFmpeg `-t {totalDuration}` cap prevents accidental infinite loops            |
