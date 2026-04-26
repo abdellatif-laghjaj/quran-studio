@@ -59,10 +59,10 @@ Never use raw `Input` or `Textarea` inside an `InputGroup`.
 **Correct:**
 
 ```tsx
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
-;<InputGroup>
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+<InputGroup>
   <InputGroupInput placeholder="Search..." />
-</InputGroup>
+</InputGroup>;
 ```
 
 ---
@@ -89,15 +89,15 @@ import {
   InputGroup,
   InputGroupInput,
   InputGroupAddon,
-} from "@/components/ui/input-group"
-;<InputGroup>
+} from "@/components/ui/input-group";
+<InputGroup>
   <InputGroupInput placeholder="Search..." />
   <InputGroupAddon>
     <Button size="icon">
       <SearchIcon data-icon="inline-start" />
     </Button>
   </InputGroupAddon>
-</InputGroup>
+</InputGroup>;
 ```
 
 ---
@@ -127,12 +127,12 @@ const [selected, setSelected] = useState("daily")
 **Correct:**
 
 ```tsx
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-;<ToggleGroup spacing={2}>
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+<ToggleGroup spacing={2}>
   <ToggleGroupItem value="daily">Daily</ToggleGroupItem>
   <ToggleGroupItem value="weekly">Weekly</ToggleGroupItem>
   <ToggleGroupItem value="monthly">Monthly</ToggleGroupItem>
-</ToggleGroup>
+</ToggleGroup>;
 ```
 
 Combine with `Field` for labelled toggle groups:

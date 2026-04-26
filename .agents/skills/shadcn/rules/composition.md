@@ -87,13 +87,13 @@ This applies to all group-based components:
 ## Toast notifications use sonner
 
 ```tsx
-import { toast } from "sonner"
+import { toast } from "sonner";
 
-toast.success("Changes saved.")
-toast.error("Something went wrong.")
+toast.success("Changes saved.");
+toast.error("Something went wrong.");
 toast("File deleted.", {
   action: { label: "Undo", onClick: () => undoDelete() },
-})
+});
 ```
 
 ---

@@ -21,20 +21,20 @@ React DOM provides APIs to hint the browser about resources it will need. These 
 **Example (preconnect to third-party APIs):**
 
 ```tsx
-import { preconnect, prefetchDNS } from "react-dom"
+import { preconnect, prefetchDNS } from "react-dom";
 
 export default function App() {
-  prefetchDNS("https://analytics.example.com")
-  preconnect("https://api.example.com")
+  prefetchDNS("https://analytics.example.com");
+  preconnect("https://api.example.com");
 
-  return <main>{/* content */}</main>
+  return <main>{/* content */}</main>;
 }
 ```
 
 **Example (preload critical fonts and styles):**
 
 ```tsx
-import { preload, preinit } from "react-dom"
+import { preload, preinit } from "react-dom";
 
 export default function RootLayout({ children }) {
   // Preload font file
@@ -42,28 +42,28 @@ export default function RootLayout({ children }) {
     as: "font",
     type: "font/woff2",
     crossOrigin: "anonymous",
-  })
+  });
 
   // Fetch and apply critical stylesheet immediately
-  preinit("/styles/critical.css", { as: "style" })
+  preinit("/styles/critical.css", { as: "style" });
 
   return (
     <html>
       <body>{children}</body>
     </html>
-  )
+  );
 }
 ```
 
 **Example (preload modules for code-split routes):**
 
 ```tsx
-import { preloadModule, preinitModule } from "react-dom"
+import { preloadModule, preinitModule } from "react-dom";
 
 function Navigation() {
   const preloadDashboard = () => {
-    preloadModule("/dashboard.js", { as: "script" })
-  }
+    preloadModule("/dashboard.js", { as: "script" });
+  };
 
   return (
     <nav>
@@ -71,7 +71,7 @@ function Navigation() {
         Dashboard
       </a>
     </nav>
-  )
+  );
 }
 ```
 

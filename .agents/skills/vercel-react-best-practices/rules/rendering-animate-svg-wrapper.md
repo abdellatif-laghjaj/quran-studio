@@ -17,7 +17,7 @@ function LoadingSpinner() {
     <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10" stroke="currentColor" />
     </svg>
-  )
+  );
 }
 ```
 
@@ -31,7 +31,7 @@ function LoadingSpinner() {
         <circle cx="12" cy="12" r="10" stroke="currentColor" />
       </svg>
     </div>
-  )
+  );
 }
 ```
 

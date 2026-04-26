@@ -90,7 +90,7 @@ function PageHeader() {
         <Button>Get started</Button>
       </motion.div>
     </motion.div>
-  )
+  );
 }
 ```
 
@@ -198,7 +198,7 @@ When icons appear or disappear contextually (on hover, on state change), animate
 ### Motion Example
 
 ```tsx
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react";
 
 function IconButton({ isActive, icon: Icon }) {
   return (
@@ -215,7 +215,7 @@ function IconButton({ isActive, icon: Icon }) {
         </motion.span>
       </AnimatePresence>
     </button>
-  )
+  );
 }
 ```
 
@@ -237,7 +237,7 @@ function IconButton({ isActive, ActiveIcon, InactiveIcon }) {
             "cubic-bezier(0.2, 0, 0, 1)",
             isActive
               ? "blur-0 scale-100 opacity-100"
-              : "scale-[0.25] opacity-0 blur-[4px]"
+              : "scale-[0.25] opacity-0 blur-[4px]",
           )}
         >
           <ActiveIcon />
@@ -248,14 +248,14 @@ function IconButton({ isActive, ActiveIcon, InactiveIcon }) {
             "cubic-bezier(0.2, 0, 0, 1)",
             isActive
               ? "scale-[0.25] opacity-0 blur-[4px]"
-              : "blur-0 scale-100 opacity-100"
+              : "blur-0 scale-100 opacity-100",
           )}
         >
           <InactiveIcon />
         </div>
       </div>
     </button>
-  )
+  );
 }
 ```
 
