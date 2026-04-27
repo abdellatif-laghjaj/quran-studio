@@ -34,7 +34,8 @@ export default function VideoCanvas({
   isExporting,
   loadingProgress,
 }: VideoCanvasProps) {
-  const { bismillahImgRef, bgImageRef } = useAssetLoader(config);
+  const { bismillahImgRef, bgImageRef, bgVideoRef, bgVideoPosterRef } =
+    useAssetLoader(config);
   const { fontsLoaded } = useFontLoader(config, verses);
 
   const scratchCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -58,23 +59,49 @@ export default function VideoCanvas({
 
     checkTime();
 
-    // 1. Clear & Background
-    if (config.backgroundType === "image" && bgImageRef.current) {
-      const img = bgImageRef.current;
+    const drawCoverMedia = (
+      source: CanvasImageSource,
+      sourceWidth: number,
+      sourceHeight: number,
+    ) => {
       const scale = Math.max(
-        canvas.width / img.width,
-        canvas.height / img.height,
+        canvas.width / sourceWidth,
+        canvas.height / sourceHeight,
       );
-      const scaledWidth = img.width * scale;
-      const scaledHeight = img.height * scale;
+      const scaledWidth = sourceWidth * scale;
+      const scaledHeight = sourceHeight * scale;
+      const x =
+        (canvas.width - scaledWidth) * ((config.backgroundImageX ?? 50) / 100);
+      const y =
+        (canvas.height - scaledHeight) *
+        ((config.backgroundImageY ?? 50) / 100);
 
-      const posX = config.backgroundImageX ?? 50;
-      const x = (canvas.width - scaledWidth) * (posX / 100);
+      ctx.drawImage(source, x, y, scaledWidth, scaledHeight);
+    };
 
-      const posY = config.backgroundImageY ?? 50;
-      const y = (canvas.height - scaledHeight) * (posY / 100);
+    // 1. Clear & Background
+    if (config.backgroundType === "video" && config.backgroundVideo) {
+      const video = bgVideoRef.current;
+      const poster = bgVideoPosterRef.current || bgImageRef.current;
 
-      ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+      if (video?.readyState && video.videoWidth > 0 && video.videoHeight > 0) {
+        if (video.paused) video.play().catch(() => undefined);
+        drawCoverMedia(video, video.videoWidth, video.videoHeight);
+      } else if (poster) {
+        drawCoverMedia(poster, poster.width, poster.height);
+      } else {
+        ctx.fillStyle = config.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      ctx.fillStyle = `rgba(0,0,0,${config.backgroundImageOpacity})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else if (config.backgroundType === "image" && bgImageRef.current) {
+      drawCoverMedia(
+        bgImageRef.current,
+        bgImageRef.current.width,
+        bgImageRef.current.height,
+      );
       ctx.fillStyle = `rgba(0,0,0,${config.backgroundImageOpacity})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
