@@ -4,11 +4,9 @@ import {
   Download,
   Settings,
   Github,
-  Globe,
-  Youtube,
-  Facebook,
+  Linkedin,
+  Twitter,
   Instagram,
-  Send,
   FolderOpen,
   FileText,
   CheckCircle2,
@@ -76,74 +74,65 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
   if (!isOpen) return null;
 
   const renderContent = () => {
+    const getSocialIcon = (platform: string) => {
+      if (platform === "github") return <Github size={16} />;
+      if (platform === "linkedin") return <Linkedin size={16} />;
+      if (platform === "instagram") return <Instagram size={16} />;
+      if (platform === "x") return <Twitter size={16} />;
+      return <Info size={16} />;
+    };
+
     switch (activeTab) {
       case "info":
         return (
-          <div className="flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-300">
-            {/* Logo Container with Glow */}
-            <div className="relative group cursor-default mt-4">
-              <div className="absolute -inset-4 bg-emerald-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
-              <div className="relative w-24 h-24 bg-white/10 rounded-[1.75rem] flex items-center justify-center border border-white/10 shadow-2xl ring-1 ring-white/5 group-hover:scale-105 transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)">
+          <div className="flex flex-col items-center text-center space-y-6 animate-in fade-in duration-200">
+            <div className="mt-2">
+              <div className="w-20 h-20 bg-white/[0.04] rounded-2xl flex items-center justify-center border border-white/10">
                 <img
                   src="/icon/favicon.svg"
                   alt="Logo"
-                  className="w-16 h-16 opacity-100 drop-shadow-[0_0_25px_rgba(52,211,153,0.4)] invert brightness-0"
+                  className="w-12 h-12 opacity-90 invert brightness-0"
                 />
               </div>
             </div>
 
-            {/* Info */}
-            <div className="space-y-3 w-full">
+            <div className="space-y-3 w-full max-w-sm">
               <h3 className="text-2xl font-bold text-white tracking-tight leading-tight">
-                <span className="bg-gradient-to-b from-white via-white to-white/60 bg-clip-text text-transparent">
-                  {appInfo.appName}
-                </span>
+                {appInfo.appName}
               </h3>
 
-              <div className="flex items-center justify-center gap-3 text-sm">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs font-medium tracking-wide shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-zinc-300 font-mono text-xs font-medium tracking-wide">
                   {appInfo.version}
                 </span>
+                <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-zinc-300 text-xs font-medium">
+                  by {appInfo.author}
+                </span>
               </div>
-              <p className="text-zinc-400 text-sm max-w-xs mx-auto leading-relaxed">
+              <p className="text-zinc-400 text-sm leading-relaxed">
                 {appInfo.description}
               </p>
             </div>
 
-            {/* Divider */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="w-full h-px bg-white/10" />
 
-            {/* Social Links */}
-            <div className="flex flex-wrap items-center justify-center gap-3 w-full px-4">
+            <div className="flex flex-wrap items-center justify-center gap-3 w-full">
               {appInfo.socialLinks.map((link) => {
-                // Helper to get icon component
-                const getIcon = (platform: string) => {
-                  if (platform.includes("github")) return <Github size={18} />;
-                  if (platform.includes("youtube"))
-                    return <Youtube size={18} />;
-                  if (platform.includes("facebook"))
-                    return <Facebook size={18} />;
-                  if (platform.includes("instagram"))
-                    return <Instagram size={18} />;
-                  if (platform.includes("telegram")) return <Send size={18} />;
-                  return <Globe size={18} />;
-                };
-
                 return (
                   <Tooltip
                     key={link.platform}
-                    content={link.platform}
+                    content={link.platform === "x" ? "X" : link.platform}
                     position="top"
                   >
                     <a
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-[transform,background-color,border-color,color,box-shadow] duration-300 hover:-translate-y-1 active:scale-[0.96] hover:shadow-lg hover:shadow-emerald-500/10 text-zinc-400 hover:text-white block"
+                      aria-label={link.platform}
+                      title={link.label}
+                      className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/[0.07] hover:border-white/20 active:scale-[0.96] transition-[transform,background-color,border-color,color] flex items-center justify-center"
                     >
-                      {getIcon(link.platform)}
-                      {/* Tooltip-ish Glow */}
-                      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20 transition-all"></div>
+                      {getSocialIcon(link.platform)}
                     </a>
                   </Tooltip>
                 );
@@ -153,8 +142,8 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
         );
       case "download":
         return (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-6 animate-in fade-in zoom-in duration-300 w-full">
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-2">
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-6 animate-in fade-in duration-200 w-full">
+            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mb-2">
               <Download className="w-8 h-8 text-zinc-500" />
             </div>
 
@@ -172,14 +161,14 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                 <div className="flex gap-2 justify-center">
                   <button
                     onClick={() => handleSetDefault("Download")}
-                    className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-[0.96] text-xs font-medium text-zinc-300 transition-[transform,background-color] flex items-center gap-2"
+                    className="px-4 py-2 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] active:scale-[0.96] text-xs font-medium text-zinc-300 transition-[transform,background-color] flex items-center gap-2"
                   >
                     <Download size={14} />
                     Downloads
                   </button>
                   <button
                     onClick={() => handleSetDefault("Documents")}
-                    className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-[0.96] text-xs font-medium text-zinc-300 transition-[transform,background-color] flex items-center gap-2"
+                    className="px-4 py-2 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] active:scale-[0.96] text-xs font-medium text-zinc-300 transition-[transform,background-color] flex items-center gap-2"
                   >
                     <FileText size={14} />
                     Documents
@@ -191,12 +180,12 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                     type="text"
                     value={exportPath}
                     readOnly
-                    className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                    className="w-full bg-black/20 border border-white/10 rounded-lg py-3 pl-4 pr-12 text-xs text-zinc-300 focus:outline-none focus:border-white/25 transition-colors"
                     placeholder="Select export folder..."
                   />
                   <button
                     onClick={handleBrowse}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 active:scale-[0.96] text-zinc-400 hover:text-white transition-[transform,background-color,color]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-white/5 hover:bg-white/10 active:scale-[0.96] text-zinc-400 hover:text-white transition-[transform,background-color,color]"
                     title="Browse Folder"
                   >
                     <FolderOpen size={14} />
@@ -205,11 +194,11 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
 
                 <button
                   onClick={toggleSkipDialog}
-                  className={`w-full p-3 rounded-xl border transition-[transform,background-color,border-color] active:scale-[0.96] flex items-center justify-between group ${skipDialog ? "bg-emerald-500/10 border-emerald-500/20" : "bg-white/5 border-white/5 hover:bg-white/10"}`}
+                  className={`w-full p-3 rounded-lg border transition-[transform,background-color,border-color] active:scale-[0.96] flex items-center justify-between group ${skipDialog ? "bg-white/[0.08] border-white/20" : "bg-white/[0.04] border-white/10 hover:bg-white/[0.07]"}`}
                 >
                   <div className="text-left">
                     <span
-                      className={`text-xs font-medium block ${skipDialog ? "text-emerald-400" : "text-zinc-300"}`}
+                      className={`text-xs font-medium block ${skipDialog ? "text-white" : "text-zinc-300"}`}
                     >
                       Quick Export
                     </span>
@@ -218,7 +207,7 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                     </span>
                   </div>
                   <div
-                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${skipDialog ? "bg-emerald-500 border-emerald-500" : "border-zinc-600"}`}
+                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${skipDialog ? "bg-white border-white" : "border-zinc-600"}`}
                   >
                     {skipDialog && (
                       <CheckCircle2 size={12} className="text-black" />
@@ -232,13 +221,13 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
                 </p>
               </div>
             ) : (
-              <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 w-full text-xs text-yellow-200/80">
+              <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 w-full text-xs text-yellow-200/80">
                 You are using the web version. Downloads will be saved to your
                 browser's default download folder.
               </div>
             )}
 
-            <div className="p-4 rounded-xl bg-white/5 border border-white/5 w-full text-xs text-zinc-400 text-left space-y-1">
+            <div className="p-4 rounded-lg bg-white/[0.04] border border-white/10 w-full text-xs text-zinc-400 text-left space-y-1">
               <div className="flex justify-between">
                 <span>Format:</span>
                 <span className="text-white">MP4 (H.264)</span>
@@ -256,13 +245,13 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
         );
       case "settings":
         return (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in zoom-in duration-300">
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-2">
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-200">
+            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mb-2">
               <Settings className="w-8 h-8 text-zinc-500" />
             </div>
             <h3 className="text-lg font-medium text-white">General Settings</h3>
             <p className="text-zinc-500 text-sm">Application preferences.</p>
-            <div className="p-4 rounded-xl bg-white/5 border border-white/5 w-full text-xs text-zinc-400">
+            <div className="p-4 rounded-lg bg-white/[0.04] border border-white/10 w-full text-xs text-zinc-400">
               Theme: Dark
               <br />
               Language: English / Arabic
@@ -273,35 +262,31 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Overlay Backdrop Click to Close */}
       <div className="absolute inset-0" onClick={onClose}></div>
 
       {/* Card Container */}
-      <div className="relative w-full max-w-md bg-zinc-950/90 rounded-[2rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-        {/* Background Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none"></div>
-
-        {/* Header / Tabs */}
-        <div className="flex items-center justify-between p-2 m-2 bg-white/5 rounded-[1.75rem] border border-white/5 relative z-10">
+      <div className="relative w-full max-w-md bg-zinc-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex items-center justify-between p-2 m-2 bg-white/[0.04] rounded-xl border border-white/10 relative z-10">
           <div className="flex items-center gap-1 w-full">
             <button
               onClick={() => setActiveTab("info")}
-              className={`flex-1 py-2.5 rounded-[1.25rem] text-sm font-medium transition-[background-color,color,box-shadow] duration-300 flex items-center justify-center gap-2 ${activeTab === "info" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-[background-color,color] duration-200 flex items-center justify-center gap-2 ${activeTab === "info" ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05]"}`}
             >
               <Info size={16} />
               <span>Info</span>
             </button>
             <button
               onClick={() => setActiveTab("download")}
-              className={`flex-1 py-2.5 rounded-[1.25rem] text-sm font-medium transition-[background-color,color,box-shadow] duration-300 flex items-center justify-center gap-2 ${activeTab === "download" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-[background-color,color] duration-200 flex items-center justify-center gap-2 ${activeTab === "download" ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05]"}`}
             >
               <Download size={16} />
               <span>Export</span>
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              className={`flex-1 py-2.5 rounded-[1.25rem] text-sm font-medium transition-[background-color,color,box-shadow] duration-300 flex items-center justify-center gap-2 ${activeTab === "settings" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"}`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-[background-color,color] duration-200 flex items-center justify-center gap-2 ${activeTab === "settings" ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05]"}`}
             >
               <Settings size={16} />
               <span>Settings</span>
@@ -323,16 +308,16 @@ export default function AboutOverlay({ isOpen, onClose }: AboutOverlayProps) {
         </div>
 
         {/* Footer - Developer Info */}
-        <div className="p-4 border-t border-white/5 bg-black/20 text-center relative z-10">
+        <div className="p-4 border-t border-white/10 bg-black/20 text-center relative z-10">
           <p className="text-xs text-zinc-500 font-medium tracking-wide">
             Developed by{" "}
             <a
-              href="https://t.me/oussamadev"
+              href="https://github.com/abdellatif-laghjaj"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-500 hover:text-emerald-400 transition-colors"
+              className="text-zinc-300 hover:text-white transition-colors"
             >
-              @oussamadev
+              @{appInfo.author}
             </a>
           </p>
         </div>

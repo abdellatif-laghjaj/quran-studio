@@ -1,38 +1,28 @@
 {
   "appName": "Quran Video Studio",
   "version": "v1.0.0",
-  "author": "oussamadev",
-  "description": "Create and edit Quran videos easily.",
+  "author": "abdellatif-laghjaj",
+  "description": "Create Quran recitation videos with timed text, translations, rich backgrounds, and fast MP4 export.",
   "socialLinks": [
     {
-      "platform": "website",
-      "url": "http://quran8vs.pages.dev/",
-      "iconPath": "/icon/favicon.svg"
+      "platform": "github",
+      "url": "https://github.com/abdellatif-laghjaj",
+      "label": "abdellatif-laghjaj"
     },
     {
-      "platform": "youtube",
-      "url": "http://www.youtube.com/@quran8vs",
-      "iconPath": "/social_media/youtube.svg"
-    },
-    {
-      "platform": "facebook",
-      "url": "https://www.facebook.com/quran8vs/",
-      "iconPath": "/social_media/facebook.svg"
+      "platform": "linkedin",
+      "url": "https://www.linkedin.com/in/abdellatif-laghjaj",
+      "label": "abdellatif-laghjaj"
     },
     {
       "platform": "instagram",
-      "url": "https://www.instagram.com/quran8vs/",
-      "iconPath": "/social_media/instagram.svg"
+      "url": "https://www.instagram.com/abdellatif.ai",
+      "label": "abdellatif.ai"
     },
     {
-      "platform": "telegram",
-      "url": "https://telegram.me/quran8vs",
-      "iconPath": "/social_media/telegram.svg"
-    },
-    {
-      "platform": "github",
-      "url": "https://github.com/quran8vs",
-      "iconPath": "/social_media/github.svg"
+      "platform": "x",
+      "url": "https://x.com/abdellatif_kira",
+      "label": "abdellatif_kira"
     }
   ]
 }
