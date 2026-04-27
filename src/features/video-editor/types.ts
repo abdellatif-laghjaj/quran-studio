@@ -11,8 +11,10 @@ export interface VideoConfig {
   backgroundColor: string;
 
   // Background Image Support
-  backgroundType: "color" | "image";
+  backgroundType: "color" | "image" | "video";
   backgroundImage: string | null;
+  backgroundVideo: string | null;
+  backgroundVideoPoster: string | null;
   backgroundImageOpacity: number;
   backgroundImageX: number;
   backgroundImageY: number;

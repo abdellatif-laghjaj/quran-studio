@@ -1,377 +1,121 @@
-# 🎬 Quran Video Studio
+# Quran Studio
 
-> A professional web-based tool for creating high-quality Quran recitation videos with synchronized audio, typography, and styling.
+Quran Studio is a web and desktop-ready editor for creating Quran recitation videos. It combines Quran text, translations, timed recitation audio, typography controls, and visual backgrounds into an exportable MP4 canvas workflow.
 
-[![License](https://img.shields.io/badge/license-Open%20Source-brightgreen)](LICENSE)
-[![Built with React](https://img.shields.io/badge/built%20with-React-61DAFB?logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+The app is built with React, Vite, TypeScript, Tailwind CSS, Bun, and Tauri.
 
-<p>
-  <img src="https://img.shields.io/badge/Dev_by-Oussama-blue?style=for-the-badge">
-  <br>
-  <sub>Built with the help of AI • <a href="https://t.me/oussamadev">Contact via Telegram</a> • <a href="https://ko-fi.com/oussamadev">Support on Ko-fi ☕</a></sub>
-</p>
+## Features
 
----
+- Quran verse selection by surah and ayah range.
+- Multiple reciters with timed audio playback.
+- Canvas preview in `9:16`, `16:9`, and `1:1` formats.
+- Quran typography controls, including Quran.com font families.
+- Translation display with normal, karaoke, and word highlight modes.
+- Surah header, Bismillah, and verse marker styling.
+- Background modes:
+  - Solid color.
+  - Pixabay image search with automatic initial fetch.
+  - Pixabay video search with poster previews and video canvas rendering.
+  - Local image upload.
+- HD MP4 export using WebCodecs and `mp4-muxer`.
+- Tauri-compatible file saving for desktop builds.
 
-![Alt text](https://i.postimg.cc/z5SZwtHW/02.png)
+## Requirements
 
-## 📋 Table of Contents
+- [Bun](https://bun.sh/)
+- A Pixabay API key
+- A browser with WebCodecs support for MP4 export
 
-- [✨ Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [⚠️ Troubleshooting](#️-troubleshooting)
-- [📁 Project Structure](#-project-structure)
-- [🖥️ Desktop App Setup (Tauri)](#️-desktop-app-setup-tauri)
-- [📝 License](#-license)
+## Environment
 
----
+Create a `.env.local` file in the project root:
 
-## ✨ Features
+```env
+VITE_PIXABAY_API_KEY=your_pixabay_api_key_here
+```
 
-### 📖 Content Selection
+The key is used by the Image and Video background tabs to fetch results from Pixabay.
 
-- **Surah & Verse Navigation** - Easily browse and select any Surah and verse range
-- **Multiple Reciters** - Choose from renowned Quran reciters with high-quality audio
+## Getting Started
 
-### 🎵 Audio Tools
-
-- **Waveform Visualization** - See your audio in real-time
-- **Playback Controls** - Full control over audio timing and synchronization
-- **Audio Synchronization** - Perfectly aligned audio with text display
-
-### 🎨 Video Customization
-
-- **Typography** - Multiple Arabic and English font options
-- **Color Control** - Customize text colors, backgrounds, and highlighting
-- **Background Support** - Solid colors or custom uploaded images
-- **Layout Options** - Toggle Surah headers, Bismillah, and translations
-- **Aspect Ratios** - 9:16 (Story/TikTok), 1:1 (Instagram), 16:9 (YouTube)
-
-### 💾 Export & Production
-
-- **MP4 Export** - High-quality video generation
-- **Client-Side Processing** - Fast processing with mp4-muxer
-- **No Server Upload** - Your videos stay private
-
----
-
-## 🛠️ Tech Stack
-
-| Layer                  | Technology            |
-| ---------------------- | --------------------- |
-| **Frontend Framework** | React 18 + TypeScript |
-| **Build Tool**         | Vite                  |
-| **Styling**            | Tailwind CSS          |
-| **Icons**              | Lucide React          |
-| **Video Processing**   | mp4-muxer             |
-| **State Management**   | React Hooks           |
-| **Desktop (Optional)** | Tauri 2.0             |
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and npm/yarn installed
-
-The app will open at `http://localhost:3000` with Hot Module Replacement (HMR).
-
-### Production Build
+Install dependencies:
 
 ```bash
-# 1. Install dependencies
-npm install
-
-# Build optimized production bundle
-npm run build
-
-# Preview the production build locally
-npm run preview
+bun install
 ```
 
-**Why use `build` + `preview` instead of `dev`?**
+Start the development server:
 
-- `npm run dev` - For active development with fast refresh
-- `npm run build` - Optimizes all assets, creates production bundle
-- `npm run preview` - Tests the optimized build locally before deployment
-
----
-
-## ⚠️ Troubleshooting
-
-### Issue: MIME Type Error - "Expected a JavaScript module script but the server responded with a MIME type of ''"
-
-This error occurs when your dev server isn't properly serving `.ts` or `.js` files.
-
----
-
-## 📁 Project Structure
-
+```bash
+bun run dev
 ```
+
+Vite is configured to run on port `3000` by default:
+
+```text
+http://localhost:3000
+```
+
+## Scripts
+
+```bash
+bun run dev
+```
+
+Start the Vite development server.
+
+```bash
+bun run build
+```
+
+Type-check and build the production app.
+
+```bash
+bun run preview
+```
+
+Preview the production build locally.
+
+```bash
+bun run lint
+```
+
+Run ESLint.
+
+```bash
+bun run tauri
+```
+
+Run Tauri CLI commands.
+
+## Backgrounds
+
+The Image tab is the default background mode. On initial load, the app automatically fetches Pixabay image results and applies a random image as the canvas background.
+
+The Video tab fetches Pixabay videos on initial load as well. Until a video is selected, the editor keeps the current image background instead of falling back to a solid color. Selecting a video applies its poster as the preview and uses the MP4 stream while rendering the canvas.
+
+## Export Notes
+
+MP4 export is rendered from the canvas at 30 FPS with H.264 video and AAC audio. The exported file name includes the surah, ayah range, and reciter.
+
+For best results:
+
+- Wait for audio, fonts, and background assets to load before exporting.
+- Use same-origin or CORS-enabled visual assets for canvas export.
+- Keep the browser tab active while exporting long videos.
+
+## Project Structure
+
+```text
 src/
-├── app/                 # Main application component
-├── features/            # Feature modules
-│   ├── Audio/          # Audio processing & waveform
-│   ├── Quran/          # Quranic content & selection
-│   └── VideoEditor/    # Video rendering & export
-├── layouts/            # Layout components (Sidebar, etc.)
-├── shared/             # Utilities, constants, types
-└── index.tsx          # Entry point
+  app/                         Main application shell
+  features/
+    audio/                     Audio playback and recording hooks
+    quran/                     Quran data, surah data, and fetching hooks
+    video-editor/              Canvas, export hooks, media loading, rendering
+  layouts/                     Left/right sidebars and editor controls
+  shared/                      Reusable components, constants, utilities
+public/
+  fonts/                       Local font assets
+  icon/                        App icons and manifest files
 ```
-
----
-
-## 🖥️ Desktop App Setup (Tauri)
-
-### ⚠️ Important: Pre-Configuration Exists
-
-**DO NOT run `npx tauri init` directly!** This project has custom Tauri configurations. Follow these steps:
-
-### Step 1: Initialize Tauri
-
-```bash
-npx tauri init
-```
-
-Answer the prompts as follows:
-
-```
-App name: quran-video-studio
-Window title: quran-video-studio
-Web assets path: ../build
-Dev server URL: http://localhost:3000
-Frontend dev command: npm run dev
-Frontend build command: npm run build
-```
-
-### Step 2: Apply Custom Configuration
-
-1. Navigate to `src-tauri-config/` folder in project root
-2. Copy all contents (files, folders, icons)
-3. Paste into newly created `src-tauri/` folder
-4. Click **Yes to All** when prompted to replace existing files
-
-### Step 3: Install Tauri Dependencies
-
-```bash
-npm install @tauri-apps/api@2.0.0
-
-npx tauri add path
-npx tauri add fs
-npx tauri add dialog
-npx tauri add opener
-npx tauri add log
-
-cd src-tauri && cargo add log && cd ..
-```
-
-### Step 4: Run Desktop App
-
-```bash
-# Development with hot reload
-npm run tauri dev
-
-# Build native executable
-npm run tauri build
-```
-
----
-
-## 📝 License
-
-This project is open source and available for personal .
-
----
-
-**Happy creating! 🎬✨**
-
----
-
-<div dir="rtl" style="font-family: 'Arabic Typesetting', 'Simplified Arabic', Arial; margin-top: 40px; border-top: 2px solid #e5e7eb; padding-top: 20px;">
-
-# 🎬 استوديو فيديو القرآن
-
-> أداة احترافية قائمة على الويب لإنشاء مقاطع فيديو تلاوة القرآن عالية الجودة مع صوت متزامن وتطبيق طباعي واحترافي.
-
----
-
-![Alt text](https://i.postimg.cc/z5SZwtHW/02.png)
-
-## 📋 جدول المحتويات
-
-- [✨ المميزات](#-المميزات)
-- [🛠️ مجموعة التقنيات](#️-مجموعة-التقنيات)
-- [🚀 البدء السريع](#-البدء-السريع)
-- [⚠️ استكشاف الأخطاء](#️-استكشاف-الأخطاء)
-- [📁 هيكل المشروع](#-هيكل-المشروع)
-- [🖥️ إعداد تطبيق سطح المكتب](#️-إعداد-تطبيق-سطح-المكتب-tauri)
-- [📝 الترخيص](#-الترخيص)
-
----
-
-## ✨ المميزات
-
-### 📖 اختيار المحتوى
-
-- **التنقل في السور والآيات** - تصفح واختر أي سورة ونطاق آيات بسهولة
-- **متعددو القراء** - اختر من القارئين المشهورين بصوت عالي الجودة
-
-### 🎵 أدوات الصوت
-
-- **تصور الموجة الصوتية** - شاهد صوتك في الوقت الفعلي
-- **عناصر التحكم في التشغيل** - التحكم الكامل في توقيت الصوت والمزامنة
-- **مزامنة الصوت** - محاذاة مثالية للصوت مع عرض النص
-
-### 🎨 تخصيص الفيديو
-
-- **الطباعة** - خيارات خطوط عربية وإنجليزية متعددة
-- **التحكم في الألوان** - تخصيص ألوان النص والخلفيات والتمييز
-- **دعم الخلفيات** - ألوان صلبة أو صور خلفية مخصصة
-- **خيارات التخطيط** - إظهار/إخفاء رؤوس السور والبسملة والترجمات
-- **نسب العرض** - 9:16 (قصة/تيك توك)، 1:1 (إنستجرام)، 16:9 (يوتيوب)
-
-### 💾 التصدير والإنتاج
-
-- **تصدير MP4** - توليد فيديو عالي الجودة
-- **المعالجة من جانب العميل** - معالجة سريعة مع mp4-muxer
-- **بدون تحميل الخادم** - مقاطعك تبقى خاصة
-
----
-
-## 🛠️ مجموعة التقنيات
-
-| الطبقة                 | التقنية               |
-| ---------------------- | --------------------- |
-| **إطار العمل الأمامي** | React 18 + TypeScript |
-| **أداة البناء**        | Vite                  |
-| **التصميم**            | Tailwind CSS          |
-| **الأيقونات**          | Lucide React          |
-| **معالجة الفيديو**     | mp4-muxer             |
-| **إدارة الحالة**       | React Hooks           |
-| **تطبيق سطح المكتب**   | Tauri 2.0             |
-
----
-
-## 🚀 البدء السريع
-
-### المتطلبات الأساسية
-
-- Node.js 18+ و npm/yarn مثبتة
-
-### التثبيت والتطوير
-
-# 2. بدء خادم التطوير
-
-### البناء للإنتاج
-
-```bash
-# 1. تثبيت المكتبات
-npm install
-
-# بناء حزمة الإنتاج المحسّنة
-npm run build
-
-# معاينة محلية للبناء الإنتاجي
-npm run preview
-```
-
-**لماذا استخدام `build` + `preview` بدلاً من `dev`؟**
-
-- `npm run dev` - للتطوير النشط مع التحديث السريع
-- `npm run build` - يحسّن جميع الأصول وينشئ حزمة الإنتاج
-- `npm run preview` - اختبار الحزمة المحسّنة محليًا قبل النشر
-
----
-
-## ⚠️ استكشاف الأخطاء
-
-### المشكلة: خطأ نوع MIME
-
-يحدث هذا الخطأ عندما لا يقوم خادم التطوير بخدمة ملفات `.ts` أو `.js` بشكل صحيح.
-
-## 📁 هيكل المشروع
-
-```
-src/
-├── app/                 # المكون الرئيسي للتطبيق
-├── features/            # وحدات الميزات
-│   ├── Audio/          # معالجة الصوت والموجة الصوتية
-│   ├── Quran/          # محتوى وتحديد قرآني
-│   └── VideoEditor/    # عرض وتصدير الفيديو
-├── layouts/            # مكونات التخطيط
-├── shared/             # الأدوات والثوابت والأنواع المشتركة
-└── index.tsx          # نقطة الدخول
-```
-
----
-
-## 🖥️ إعداد تطبيق سطح المكتب (Tauri)
-
-### ⚠️ تحذير مهم: التكوين المسبق موجود
-
-**لا تشغل `npx tauri init` مباشرة!** يحتوي هذا المشروع على إعدادات Tauri مخصصة. اتبع هذه الخطوات:
-
-### الخطوة 1: تهيئة Tauri
-
-```bash
-npx tauri init
-```
-
-أجب على المطالبات كما يلي:
-
-```
-App name: quran-video-studio
-Window title: quran-video-studio
-Web assets path: ../build
-Dev server URL: http://localhost:3000
-Frontend dev command: npm run dev
-Frontend build command: npm run build
-```
-
-### الخطوة 2: تطبيق التكوين المخصص
-
-1. انتقل إلى مجلد `src-tauri-config/` في جذر المشروع
-2. انسخ جميع المحتويات (الملفات والمجلدات والأيقونات)
-3. الصق في مجلد `src-tauri/` الذي تم إنشاؤه حديثًا
-4. انقر فوق **نعم للكل** عند المطالبة باستبدال الملفات الموجودة
-
-### الخطوة 3: تثبيت تبعيات Tauri
-
-```bash
-npm install @tauri-apps/api@2.0.0
-
-npx tauri add path
-npx tauri add fs
-npx tauri add dialog
-npx tauri add opener
-npx tauri add log
-
-cd src-tauri && cargo add log && cd ..
-```
-
-### الخطوة 4: تشغيل تطبيق سطح المكتب
-
-```bash
-# التطوير مع إعادة التحميل الفوري
-npm run tauri dev
-
-# بناء التطبيق الأصلي
-npm run tauri build
-```
-
----
-
-## 📝 الترخيص
-
-هذا المشروع مفتوح المصدر ومتاح للاستخدام الشخصي .
-
----
-
-**سعيد بالإنشاء! 🎬✨**
-
-تم بناء هذا المشروع بـ ❤️
-
-</div>

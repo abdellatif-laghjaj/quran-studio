@@ -33,7 +33,7 @@ export default function LeftSidebar({
   const isApp = isTauri();
 
   return (
-    <div className="w-full md:w-[320px] flex flex-col border-r border-white/5 bg-[#121214] h-full z-10 shadow-2xl relative transition-all duration-300 font-sans">
+    <div className="w-full md:w-[400px] flex flex-col border-r border-white/5 bg-[#121214] h-full z-10 shadow-2xl relative transition-all duration-300 font-sans">
       {/* Header */}
       <div
         className={`py-5 border-b border-white/5 bg-[#121214] shrink-0 text-center relative overflow-hidden ${isApp ? "cursor-move" : ""}`}
