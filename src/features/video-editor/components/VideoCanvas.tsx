@@ -17,6 +17,9 @@ interface VideoCanvasProps {
   verses: VerseData[];
   currentVerseIndex: number;
   audioRef: React.RefObject<HTMLAudioElement>;
+  renderFrameAtTimeRef?: React.MutableRefObject<
+    ((currentTimeMs: number) => void) | null
+  >;
   checkTime: () => void;
   isLoading: boolean;
   isExporting: boolean;
@@ -29,6 +32,7 @@ export default function VideoCanvas({
   verses,
   currentVerseIndex,
   audioRef,
+  renderFrameAtTimeRef,
   checkTime,
   isLoading,
   isExporting,
@@ -52,12 +56,13 @@ export default function VideoCanvas({
     }
   }, []);
 
-  const renderFrame = () => {
+  const renderFrame = (overrideTimeMs?: number) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
-    checkTime();
+    const isExportFrame = overrideTimeMs !== undefined;
+    if (!isExportFrame) checkTime();
 
     const drawCoverMedia = (
       source: CanvasImageSource,
@@ -114,8 +119,21 @@ export default function VideoCanvas({
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const activeVerse = verses[currentVerseIndex];
-    const currentTimeMs = (audioRef.current?.currentTime || 0) * 1000;
+    const currentTimeMs =
+      overrideTimeMs ?? (audioRef.current?.currentTime || 0) * 1000;
+    const exportVerseIndex = verses.findIndex((verse) => {
+      if (!verse.timing) return false;
+      return (
+        currentTimeMs >= verse.timing.timestamp_from &&
+        currentTimeMs < verse.timing.timestamp_to
+      );
+    });
+    const activeVerse =
+      verses[
+        isExportFrame && exportVerseIndex !== -1
+          ? exportVerseIndex
+          : currentVerseIndex
+      ];
     const centerX = canvas.width / 2;
 
     if (config.showSurahHeader) {
@@ -306,6 +324,15 @@ export default function VideoCanvas({
       }
     }
   };
+
+  useEffect(() => {
+    if (!renderFrameAtTimeRef) return;
+    renderFrameAtTimeRef.current = renderFrame;
+
+    return () => {
+      renderFrameAtTimeRef.current = null;
+    };
+  });
 
   useEffect(() => {
     let running = true;

@@ -12,6 +12,9 @@ export function useVideoExporter(
   audioUrl: string | null,
   canvasRef: React.RefObject<HTMLCanvasElement>,
   audioRef: React.RefObject<HTMLAudioElement>,
+  renderFrameAtTimeRef: React.MutableRefObject<
+    ((currentTimeMs: number) => void) | null
+  >,
 ) {
   const [isVideoExporting, setIsVideoExporting] = useState(false);
   const [videoExportProgress, setVideoExportProgress] = useState(0);
@@ -102,27 +105,20 @@ export function useVideoExporter(
       const audioArrayBuffer = await audioResp.arrayBuffer();
       const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
-      // Slice Audio Buffer
+      // Slice and interleave audio without creating an intermediate AudioBuffer.
       const startSample = Math.floor(startTime * 44100);
       const endSample = Math.floor(endTime * 44100);
       const length = endSample - startSample;
-      const slicedBuffer = audioCtx.createBuffer(2, length, 44100);
-
-      for (let channel = 0; channel < 2; channel++) {
-        const channelData = audioBuffer.getChannelData(channel);
-        const slicedData = slicedBuffer.getChannelData(channel);
-        for (let i = 0; i < length; i++) {
-          slicedData[i] = channelData[startSample + i] || 0;
-        }
-      }
-
-      // Interleave audio data for AudioData
-      const left = slicedBuffer.getChannelData(0);
-      const right = slicedBuffer.getChannelData(1);
+      const leftSource = audioBuffer.getChannelData(0);
+      const rightSource =
+        audioBuffer.numberOfChannels > 1
+          ? audioBuffer.getChannelData(1)
+          : leftSource;
       const interleaved = new Float32Array(length * 2);
       for (let i = 0; i < length; i++) {
-        interleaved[i * 2] = left[i];
-        interleaved[i * 2 + 1] = right[i];
+        const sampleIndex = startSample + i;
+        interleaved[i * 2] = leftSource[sampleIndex] || 0;
+        interleaved[i * 2 + 1] = rightSource[sampleIndex] || 0;
       }
 
       // Create AudioData directly from interleaved buffer
@@ -143,6 +139,10 @@ export function useVideoExporter(
       setExportStatus("Rendering Video Frames...");
       const canvas = canvasRef.current;
       const audio = audioRef.current;
+      const renderFrameAtTime = renderFrameAtTimeRef.current;
+      const canUseFastRenderer =
+        Boolean(renderFrameAtTime) &&
+        !(config.backgroundType === "video" && config.backgroundVideo);
 
       const originalTime = audio.currentTime;
       const originalVolume = audio.volume;
@@ -153,25 +153,32 @@ export function useVideoExporter(
         const t = startTime + i / fps;
         const timestampMicro = (i / fps) * 1_000_000;
 
-        // Update Canvas State
-        audio.currentTime = t;
-
-        // Wait for Paint
-        await new Promise<void>((resolve) => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => resolve());
+        if (canUseFastRenderer && renderFrameAtTime) {
+          renderFrameAtTime(t * 1000);
+        } else {
+          audio.currentTime = t;
+          await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => resolve());
+            });
           });
-        });
+        }
 
-        // Create VideoFrame from Canvas
         const frame = new VideoFrame(canvas, { timestamp: timestampMicro });
 
-        // Encode
         videoEncoder.encode(frame, { keyFrame: i % 30 === 0 });
         frame.close();
 
-        // Progress
-        setVideoExportProgress(Math.round(((i + 1) / totalFrames) * 100));
+        if (videoEncoder.encodeQueueSize > 8) {
+          await new Promise((resolve) =>
+            videoEncoder.addEventListener("dequeue", resolve, { once: true }),
+          );
+        }
+
+        if (i % 10 === 0 || i === totalFrames - 1) {
+          setVideoExportProgress(Math.round(((i + 1) / totalFrames) * 100));
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
       }
 
       setExportStatus("Finalizing...");

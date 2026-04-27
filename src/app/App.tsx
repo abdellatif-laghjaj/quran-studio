@@ -78,6 +78,9 @@ export default function App() {
     useQuranData(config);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const renderFrameAtTimeRef = useRef<((currentTimeMs: number) => void) | null>(
+    null,
+  );
 
   // Existing Audio Player Hook (Kept for Playback/Preview)
   const {
@@ -95,7 +98,14 @@ export default function App() {
     videoExportProgress,
     exportStatus,
     startVideoExport,
-  } = useVideoExporter(config, verses, audioUrl, canvasRef, audioRef);
+  } = useVideoExporter(
+    config,
+    verses,
+    audioUrl,
+    canvasRef,
+    audioRef,
+    renderFrameAtTimeRef,
+  );
 
   const isAnyExporting = isVideoExporting;
 
@@ -137,6 +147,7 @@ export default function App() {
           verses={verses}
           currentVerseIndex={currentVerseIndex}
           audioRef={audioRef}
+          renderFrameAtTimeRef={renderFrameAtTimeRef}
           checkTime={checkTime}
           isLoading={isLoading}
           isExporting={isAnyExporting} // Disable interactions during exports
