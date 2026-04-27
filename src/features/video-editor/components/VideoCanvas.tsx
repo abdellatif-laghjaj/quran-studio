@@ -80,11 +80,16 @@ export default function VideoCanvas({
     };
 
     // 1. Clear & Background
-    if (config.backgroundType === "video" && config.backgroundVideo) {
+    if (config.backgroundType === "video") {
       const video = bgVideoRef.current;
       const poster = bgVideoPosterRef.current || bgImageRef.current;
 
-      if (video?.readyState && video.videoWidth > 0 && video.videoHeight > 0) {
+      if (
+        config.backgroundVideo &&
+        video?.readyState &&
+        video.videoWidth > 0 &&
+        video.videoHeight > 0
+      ) {
         if (video.paused) video.play().catch(() => undefined);
         drawCoverMedia(video, video.videoWidth, video.videoHeight);
       } else if (poster) {

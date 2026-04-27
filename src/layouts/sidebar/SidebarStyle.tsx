@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   Loader2,
@@ -7,7 +7,6 @@ import {
   Search,
   Sparkles,
   Subtitles,
-  Trash2,
   Type,
   Upload,
   Video,
@@ -38,86 +37,111 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
   const [imageError, setImageError] = useState<string | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
 
-  const activeTab = useMemo(
-    () => config.backgroundType,
-    [config.backgroundType],
-  );
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setConfig({
-            ...config,
-            backgroundImage: event.target.result as string,
+      reader.onload = () => {
+        if (reader.result) {
+          setConfig((current) => ({
+            ...current,
+            backgroundImage: reader.result as string,
             backgroundType: "image",
             backgroundVideo: null,
             backgroundVideoPoster: null,
-          });
+          }));
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const loadImages = async (query = imageQuery) => {
-    setImageLoading(true);
-    setImageError(null);
-    try {
-      setImages(await searchPixabayImages(query));
-    } catch (error) {
-      setImageError(
-        error instanceof Error ? error.message : "Could not load images.",
-      );
-    } finally {
-      setImageLoading(false);
-    }
-  };
+  const selectImage = useCallback(
+    (imageResult: PixabayImageResult) => {
+      setConfig((current) => ({
+        ...current,
+        backgroundType: "image",
+        backgroundImage: imageResult.imageUrl,
+        backgroundVideo: null,
+        backgroundVideoPoster: null,
+      }));
+    },
+    [setConfig],
+  );
 
-  const loadVideos = async (query = videoQuery) => {
-    setVideoLoading(true);
-    setVideoError(null);
-    try {
-      setVideos(await searchPixabayVideos(query));
-    } catch (error) {
-      setVideoError(
-        error instanceof Error ? error.message : "Could not load videos.",
-      );
-    } finally {
-      setVideoLoading(false);
-    }
-  };
+  const selectVideo = useCallback(
+    (videoResult: PixabayVideoResult) => {
+      setConfig((current) => ({
+        ...current,
+        backgroundType: "video",
+        backgroundImage: videoResult.posterUrl,
+        backgroundVideo: videoResult.videoUrl,
+        backgroundVideoPoster: videoResult.posterUrl,
+      }));
+    },
+    [setConfig],
+  );
+
+  const loadImages = useCallback(
+    async (query = imageQuery, applyRandomDefault = false) => {
+      setImageLoading(true);
+      setImageError(null);
+      try {
+        const nextImages = await searchPixabayImages(query);
+        setImages(nextImages);
+
+        if (applyRandomDefault && nextImages.length > 0) {
+          const randomImage =
+            nextImages[Math.floor(Math.random() * nextImages.length)];
+          setConfig((current) => {
+            if (current.backgroundType !== "image" || current.backgroundImage) {
+              return current;
+            }
+
+            return {
+              ...current,
+              backgroundImage: randomImage.imageUrl,
+              backgroundVideo: null,
+              backgroundVideoPoster: null,
+            };
+          });
+        }
+      } catch (error) {
+        setImageError(
+          error instanceof Error ? error.message : "Could not load images.",
+        );
+      } finally {
+        setImageLoading(false);
+      }
+    },
+    [imageQuery, setConfig],
+  );
+
+  const loadVideos = useCallback(
+    async (query = videoQuery) => {
+      setVideoLoading(true);
+      setVideoError(null);
+      try {
+        setVideos(await searchPixabayVideos(query));
+      } catch (error) {
+        setVideoError(
+          error instanceof Error ? error.message : "Could not load videos.",
+        );
+      } finally {
+        setVideoLoading(false);
+      }
+    },
+    [videoQuery],
+  );
 
   useEffect(() => {
-    if (activeTab === "image" && images.length === 0 && !imageLoading) {
-      void loadImages();
-    }
-    if (activeTab === "video" && videos.length === 0 && !videoLoading) {
-      void loadVideos();
-    }
-  }, [activeTab]);
+    const preloadTimer = window.setTimeout(() => {
+      void loadImages(imageQuery, true);
+      void loadVideos(videoQuery);
+    }, 0);
 
-  const selectImage = (imageResult: PixabayImageResult) => {
-    setConfig({
-      ...config,
-      backgroundType: "image",
-      backgroundImage: imageResult.imageUrl,
-      backgroundVideo: null,
-      backgroundVideoPoster: null,
-    });
-  };
-
-  const selectVideo = (videoResult: PixabayVideoResult) => {
-    setConfig({
-      ...config,
-      backgroundType: "video",
-      backgroundImage: videoResult.posterUrl,
-      backgroundVideo: videoResult.videoUrl,
-      backgroundVideoPoster: videoResult.posterUrl,
-    });
-  };
+    return () => window.clearTimeout(preloadTimer);
+  }, [imageQuery, loadImages, loadVideos, videoQuery]);
 
   return (
     <div className="space-y-4 pb-8">
@@ -211,14 +235,26 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
               Solid
             </button>
             <button
-              onClick={() => setConfig({ ...config, backgroundType: "image" })}
+              onClick={() => {
+                setConfig((current) => ({
+                  ...current,
+                  backgroundType: "image",
+                }));
+                if (images.length === 0) void loadImages();
+              }}
               className={`flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold rounded-md transition-all ${config.backgroundType === "image" ? "bg-white/10 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"}`}
             >
               <Image className="w-3.5 h-3.5" />
-              Game Image
+              Image
             </button>
             <button
-              onClick={() => setConfig({ ...config, backgroundType: "video" })}
+              onClick={() => {
+                setConfig((current) => ({
+                  ...current,
+                  backgroundType: "video",
+                }));
+                if (videos.length === 0) void loadVideos();
+              }}
               className={`flex items-center justify-center gap-1.5 py-2 text-[10px] font-bold rounded-md transition-all ${config.backgroundType === "video" ? "bg-white/10 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"}`}
             >
               <Video className="w-3.5 h-3.5" />
@@ -236,25 +272,6 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
             </div>
           ) : config.backgroundType === "image" ? (
             <div className="space-y-4">
-              {config.backgroundImage && (
-                <div className="relative rounded-lg overflow-hidden border border-white/10 aspect-video bg-black/20">
-                  <img
-                    src={config.backgroundImage}
-                    className="w-full h-full object-cover"
-                    alt="Selected background"
-                  />
-                  <button
-                    onClick={() =>
-                      setConfig({ ...config, backgroundImage: null })
-                    }
-                    className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-md transition-colors z-20 pointer-events-auto"
-                    title="Remove Image"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 w-3.5 h-3.5 -translate-y-1/2 text-zinc-500" />
@@ -301,6 +318,14 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
               )}
 
               <div className="grid grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
+                {imageLoading &&
+                  images.length === 0 &&
+                  Array.from({ length: 9 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="aspect-[9/12] rounded-lg border border-white/5 bg-white/[0.04] animate-pulse"
+                    />
+                  ))}
                 {images.map((imageResult) => (
                   <button
                     key={imageResult.id}
@@ -397,35 +422,6 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {config.backgroundVideoPoster && (
-                <div className="relative rounded-lg overflow-hidden border border-white/10 aspect-video bg-black/20">
-                  <img
-                    src={config.backgroundVideoPoster}
-                    className="w-full h-full object-cover"
-                    alt="Selected video frame"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                    <span className="w-11 h-11 rounded-full bg-black/55 border border-white/20 flex items-center justify-center text-white">
-                      <Play className="w-5 h-5 fill-current ml-0.5" />
-                    </span>
-                  </div>
-                  <button
-                    onClick={() =>
-                      setConfig({
-                        ...config,
-                        backgroundVideo: null,
-                        backgroundVideoPoster: null,
-                        backgroundImage: null,
-                      })
-                    }
-                    className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-md transition-colors z-20 pointer-events-auto"
-                    title="Remove Video"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 w-3.5 h-3.5 -translate-y-1/2 text-zinc-500" />
@@ -472,6 +468,14 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
               )}
 
               <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
+                {videoLoading &&
+                  videos.length === 0 &&
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="aspect-video rounded-lg border border-white/5 bg-white/[0.04] animate-pulse"
+                    />
+                  ))}
                 {videos.map((videoResult) => (
                   <button
                     key={videoResult.id}

@@ -18,7 +18,7 @@ export default function RightSidebar({
   setTypoTab,
 }: RightSidebarProps) {
   return (
-    <div className="w-full md:w-[320px] flex flex-col border-l border-white/5 bg-[#121214] h-full z-10 shadow-2xl relative transition-all duration-300 font-sans">
+    <div className="w-full md:w-[360px] flex flex-col border-l border-white/5 bg-[#121214] h-full z-10 shadow-2xl relative transition-all duration-300 font-sans">
       {/* Header */}
       <div className="py-5 border-b border-white/5 bg-[#121214] shrink-0 text-center relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-studio-accent to-transparent opacity-50 pointer-events-none"></div>

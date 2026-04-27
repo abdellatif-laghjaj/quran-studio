@@ -26,7 +26,7 @@ export default function App() {
 
     // Background Image Defaults
     backgroundType: "image",
-    backgroundImage: "https://i.postimg.cc/V16NR097/fb-00.jpg",
+    backgroundImage: null,
     backgroundVideo: null,
     backgroundVideoPoster: null,
     backgroundImageOpacity: 0.6, // Default overlay opacity
