@@ -18,6 +18,7 @@ interface LeftSidebarProps {
   surahSearch: string;
   setSurahSearch: (v: string) => void;
   verses: VerseData[];
+  onRandomBackground?: () => void;
 }
 
 export default function LeftSidebar({
@@ -31,6 +32,7 @@ export default function LeftSidebar({
   surahSearch,
   setSurahSearch,
   verses,
+  onRandomBackground,
 }: LeftSidebarProps) {
   const isApp = isTauri();
 
@@ -71,6 +73,7 @@ export default function LeftSidebar({
           setIsSurahOpen={setIsSurahOpen}
           surahSearch={surahSearch}
           setSurahSearch={setSurahSearch}
+          onRandomBackground={onRandomBackground}
         />
 
         <SidebarAudio config={config} setConfig={setConfig} verses={verses} />

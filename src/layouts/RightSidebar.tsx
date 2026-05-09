@@ -9,6 +9,7 @@ interface RightSidebarProps {
   setConfig: React.Dispatch<React.SetStateAction<VideoConfig>>;
   typoTab: "quran" | "translation";
   setTypoTab: (v: "quran" | "translation") => void;
+  onRandomBackground?: (callback: () => void) => void;
 }
 
 export default function RightSidebar({
@@ -16,6 +17,7 @@ export default function RightSidebar({
   setConfig,
   typoTab,
   setTypoTab,
+  onRandomBackground,
 }: RightSidebarProps) {
   return (
     <div className="w-full md:w-[400px] flex flex-col border-l border-white/5 bg-[#121214] h-full z-10 shadow-2xl relative transition-all duration-300 font-sans">
@@ -38,7 +40,7 @@ export default function RightSidebar({
           setTypoTab={setTypoTab}
         />
 
-        <SidebarStyle config={config} setConfig={setConfig} />
+        <SidebarStyle config={config} setConfig={setConfig} onRandomBackground={onRandomBackground} />
       </div>
     </div>
   );

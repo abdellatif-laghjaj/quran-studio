@@ -25,9 +25,10 @@ import {
 interface SidebarStyleProps {
   config: VideoConfig;
   setConfig: React.Dispatch<React.SetStateAction<VideoConfig>>;
+  onRandomBackground?: (callback: () => void) => void;
 }
 
-export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
+export default function SidebarStyle({ config, setConfig, onRandomBackground }: SidebarStyleProps) {
   const [imageQuery, setImageQuery] = useState("nature");
   const [videoQuery, setVideoQuery] = useState("ocean");
   const [images, setImages] = useState<PixabayImageResult[]>([]);
@@ -133,6 +134,20 @@ export default function SidebarStyle({ config, setConfig }: SidebarStyleProps) {
     },
     [videoQuery],
   );
+
+  const pickRandomBackground = useCallback(() => {
+    if (videos.length > 0) {
+      const randomVideo = videos[Math.floor(Math.random() * videos.length)];
+      selectVideo(randomVideo);
+    }
+  }, [videos, selectVideo]);
+
+  // Register the random background function with parent
+  useEffect(() => {
+    if (onRandomBackground) {
+      onRandomBackground(pickRandomBackground);
+    }
+  }, [onRandomBackground, pickRandomBackground]);
 
   useEffect(() => {
     const preloadTimer = window.setTimeout(() => {

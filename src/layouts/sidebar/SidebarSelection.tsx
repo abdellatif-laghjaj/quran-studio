@@ -3,6 +3,7 @@ import { Search, ChevronDown, Check, Shuffle } from "lucide-react";
 import { VideoConfig } from "../../features/video-editor/types";
 import { Surah } from "../../features/quran/types";
 import { SURAHS } from "../../features/quran/data/surahs";
+import { RECITERS } from "../../shared/constants";
 
 import { AL_QADR_FONT } from "../../shared/constants";
 
@@ -15,6 +16,7 @@ interface SidebarSelectionProps {
   setIsSurahOpen: (v: boolean) => void;
   surahSearch: string;
   setSurahSearch: (v: string) => void;
+  onRandomBackground?: () => void;
 }
 
 // Custom Verse Dropdown Component
@@ -151,6 +153,7 @@ export default function SidebarSelection({
   setIsSurahOpen,
   surahSearch,
   setSurahSearch,
+  onRandomBackground,
 }: SidebarSelectionProps) {
   const pickRandomSevenVerseRange = () => {
     const eligibleSurahs = SURAHS.filter((s) => s.totalAyahs >= 7);
@@ -178,6 +181,11 @@ export default function SidebarSelection({
     });
     setIsSurahOpen(false);
     setSurahSearch("");
+    
+    // Trigger random background selection
+    if (onRandomBackground) {
+      onRandomBackground();
+    }
   };
 
   return (

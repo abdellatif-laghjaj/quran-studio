@@ -46,7 +46,7 @@ export default function App() {
     translationFontFamily: "Lato",
     translationFontSize: 30,
     enableHighlight: true,
-    highlightColor: "#2ca4ab", // Default Accent
+    highlightColor: "#facc15", // Default Accent
     showSurahHeader: true,
     surahHeaderColor: "#e7e9ea", // Default Header Color
     surahHeaderSize: 16, // Default 16% width
@@ -68,6 +68,17 @@ export default function App() {
   const [isSurahOpen, setIsSurahOpen] = useState(false);
   const [surahSearch, setSurahSearch] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // Random background callback
+  const randomBackgroundRef = useRef<(() => void) | null>(null);
+  const handleRandomBackground = (callback: () => void) => {
+    randomBackgroundRef.current = callback;
+  };
+  const triggerRandomBackground = () => {
+    if (randomBackgroundRef.current) {
+      randomBackgroundRef.current();
+    }
+  };
 
   const currentSurah =
     SURAHS.find((s) => s.number === config.surahId) || SURAHS[0];
@@ -143,6 +154,7 @@ export default function App() {
         surahSearch={surahSearch}
         setSurahSearch={setSurahSearch}
         verses={verses}
+        onRandomBackground={triggerRandomBackground}
       />
 
       {/* PREVIEW AREA */}
@@ -243,6 +255,7 @@ export default function App() {
         setConfig={setConfig}
         typoTab={typoTab}
         setTypoTab={setTypoTab}
+        onRandomBackground={handleRandomBackground}
       />
 
       <AboutOverlay
