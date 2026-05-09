@@ -1,7 +1,7 @@
 import React from "react";
 import { AlertCircle } from "lucide-react";
 import { VideoConfig } from "../features/video-editor/types";
-import { Surah } from "../features/quran/types";
+import { Surah, VerseData } from "../features/quran/types";
 import SidebarSelection from "./sidebar/SidebarSelection";
 import SidebarAudio from "./sidebar/SidebarAudio";
 import SidebarFormat from "./sidebar/SidebarFormat";
@@ -17,6 +17,7 @@ interface LeftSidebarProps {
   setIsSurahOpen: (v: boolean) => void;
   surahSearch: string;
   setSurahSearch: (v: string) => void;
+  verses: VerseData[];
 }
 
 export default function LeftSidebar({
@@ -29,6 +30,7 @@ export default function LeftSidebar({
   setIsSurahOpen,
   surahSearch,
   setSurahSearch,
+  verses,
 }: LeftSidebarProps) {
   const isApp = isTauri();
 
@@ -71,7 +73,7 @@ export default function LeftSidebar({
           setSurahSearch={setSurahSearch}
         />
 
-        <SidebarAudio config={config} setConfig={setConfig} />
+        <SidebarAudio config={config} setConfig={setConfig} verses={verses} />
 
         <SidebarFormat config={config} setConfig={setConfig} />
       </div>

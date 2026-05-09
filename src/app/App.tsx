@@ -17,7 +17,12 @@ export default function App() {
     surahId: 1,
     verseStart: 1,
     verseEnd: 7,
+    audioSource: "reciter",
     reciterId: 10, // Sa'ud ash-Shuraim (Default)
+    customAudioUrl: null,
+    customAudioName: null,
+    customAudioDurationMs: null,
+    customVerseTimings: {},
     fontFamily: "v2", // Default KFC V2
     fontSize: 86, // Default 86px for V2
     wordSpacing: 4, // Default Word Spacing 4px
@@ -137,6 +142,7 @@ export default function App() {
         setIsSurahOpen={setIsSurahOpen}
         surahSearch={surahSearch}
         setSurahSearch={setSurahSearch}
+        verses={verses}
       />
 
       {/* PREVIEW AREA */}

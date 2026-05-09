@@ -101,3 +101,139 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-studio-textMuted);
 }
+
+.custom-audio-player-shell .rmap-player-provider {
+  --rm-audio-player-text-color: #f4f4f5;
+  --rm-audio-player-shadow: 0 0 0;
+  --rm-audio-player-interface-container: transparent;
+  --rm-audio-player-volume-background: #27272a;
+  --rm-audio-player-volume-panel-background: #18181b;
+  --rm-audio-player-volume-panel-border: rgba(255, 255, 255, 0.1);
+  --rm-audio-player-volume-thumb: #f4f4f5;
+  --rm-audio-player-volume-fill: #a3004c;
+  --rm-audio-player-volume-track: #3f3f46;
+  --rm-audio-player-track-current-time: #f4f4f5;
+  --rm-audio-player-track-duration: #71717a;
+  --rm-audio-player-progress-bar: #a3004c;
+  --rm-audio-player-progress-bar-background: #27272a;
+  background: transparent;
+  border: 0;
+  color: #f4f4f5;
+  width: 100%;
+}
+
+.custom-audio-player-shell .rmap-interface-container .rmap-interface-grid {
+  grid-template-areas:
+    "track track play volume"
+    "current progress progress duration" !important;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 2fr) auto auto !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  gap: 10px 14px;
+  min-height: 74px !important;
+  padding: 12px 14px !important;
+  background: transparent !important;
+}
+
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-2"] {
+  grid-area: track !important;
+  justify-self: stretch !important;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-3"] {
+  grid-area: current !important;
+  justify-self: start !important;
+  padding: 0 !important;
+}
+
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-4"] {
+  grid-area: duration !important;
+  justify-self: end !important;
+  padding: 0 !important;
+}
+
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-5"] {
+  grid-area: progress !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-7"] {
+  grid-area: volume !important;
+  justify-self: end !important;
+  padding: 0 !important;
+}
+
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-8"] {
+  grid-area: play !important;
+  justify-self: end !important;
+  padding: 0 !important;
+}
+
+.custom-audio-player-shell .rmap-track-info-container {
+  min-width: 0;
+  row-gap: 4px;
+}
+
+.custom-audio-player-shell .rmap-track-info-container .title {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f4f4f5;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.custom-audio-player-shell .rmap-track-info-container .writer {
+  color: #a1a1aa;
+  font-size: 12px;
+}
+
+.custom-audio-player-shell .rmap-track-time-container {
+  min-height: auto;
+  font-size: 12px !important;
+}
+
+.custom-audio-player-shell .rmap-track-time-current .rmap-track-current-time,
+.custom-audio-player-shell .rmap-track-time-duration .rmap-track-duration {
+  letter-spacing: 0;
+}
+
+.custom-audio-player-shell .rmap-progress-container {
+  min-width: 0;
+  width: 100%;
+}
+
+.custom-audio-player-shell .rmap-bar-progress-wrapper {
+  height: 16px;
+}
+
+.custom-audio-player-shell .rmap-bar-progress-wrapper .rmap-progress-bar {
+  height: 4px;
+  border-radius: 999px;
+}
+
+.custom-audio-player-shell .rmap-bar-progress-wrapper .rmap-progress-fill {
+  border-radius: 999px;
+}
+
+.custom-audio-player-shell .rmap-ctrl-btn-wrapper {
+  height: 38px;
+}
+
+.custom-audio-player-shell .styled-btn {
+  height: 32px;
+  color: #f4f4f5;
+}
+
+.custom-audio-player-shell .styled-btn.rmap-play-btn {
+  width: 38px;
+}
+
+.custom-audio-player-shell button {
+  border-radius: 999px;
+}

@@ -199,7 +199,9 @@ export function useVideoExporter(
         .replace(/['`]/g, "");
 
       const rawReciterName =
-        RECITERS.find((r) => r.id === config.reciterId)?.name || "Reciter";
+        config.audioSource === "custom"
+          ? config.customAudioName?.replace(/\.[^/.]+$/, "") || "Custom"
+          : RECITERS.find((r) => r.id === config.reciterId)?.name || "Reciter";
       const reciterName =
         rawReciterName.split(" ").pop()?.replace(/[^\w]/g, "") || "Reciter";
 

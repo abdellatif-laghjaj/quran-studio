@@ -25,10 +25,11 @@ export function useQuranData(config: VideoConfig) {
       // Check cache immediately
       const cachedText = textCache.get(config.surahId);
       const audioKey = `${config.reciterId}-${config.surahId}`;
-      const cachedAudio = audioCache.get(audioKey);
+      const cachedAudio =
+        config.audioSource === "reciter" ? audioCache.get(audioKey) : null;
 
       // If both are cached, we can skip the "loading" phase entirely to prevent UI flash
-      if (cachedText && cachedAudio) {
+      if (cachedText && (cachedAudio || config.audioSource === "custom")) {
         if (isMounted) {
           setErrorMsg(null);
           // Important: We must still update the raw data state,
@@ -79,7 +80,9 @@ export function useQuranData(config: VideoConfig) {
         // --- AUDIO DATA ---
         let aData = cachedAudio;
 
-        if (!aData) {
+        if (config.audioSource === "custom") {
+          aData = null;
+        } else if (!aData) {
           setLoadingProgress("Fetching Audio...");
 
           const targetAudioUrl = `https://api.quran.com/api/qdc/audio/reciters/${config.reciterId}/audio_files?chapter=${config.surahId}&segments=true`;
@@ -127,12 +130,13 @@ export function useQuranData(config: VideoConfig) {
     return () => {
       isMounted = false;
     };
-  }, [config.surahId, config.reciterId]);
+  }, [config.surahId, config.reciterId, config.audioSource]);
 
   // 2. Processing Effect (Triggered when raw data or verse range changes)
   // This is fast and synchronous (mostly), so it feels instant.
   useEffect(() => {
-    if (!fullTextData || !fullAudioData) return;
+    if (!fullTextData) return;
+    if (config.audioSource === "reciter" && !fullAudioData) return;
 
     // Slice Text
     const slicedVerses = fullTextData.slice(
@@ -140,23 +144,30 @@ export function useQuranData(config: VideoConfig) {
       config.verseEnd,
     );
 
-    // Process Audio Segments
-    // QDC API returns { audio_files: [...] }
-    const audioFile = fullAudioData.audio_files[0];
-    if (!audioFile) {
+    const audioFile =
+      config.audioSource === "reciter" ? fullAudioData.audio_files[0] : null;
+
+    if (config.audioSource === "reciter" && !audioFile) {
       setErrorMsg("Audio format not supported");
       return;
     }
 
-    // Set Audio URL
-    setAudioUrl(audioFile.audio_url);
+    setAudioUrl(
+      config.audioSource === "custom"
+        ? config.customAudioUrl
+        : audioFile.audio_url,
+    );
 
-    // Map Timings to Verses
-    const timings = audioFile.verse_timings || [];
+    const timings =
+      config.audioSource === "reciter" ? audioFile.verse_timings || [] : [];
 
     const processedVerses = slicedVerses.map((v: any) => {
       const verseKey = v.verse_key; // "1:1"
       const timing = timings.find((t: any) => t.verse_key === verseKey);
+      const customTiming =
+        config.audioSource === "custom"
+          ? config.customVerseTimings[verseKey]
+          : undefined;
 
       return {
         id: v.id,
@@ -165,20 +176,36 @@ export function useQuranData(config: VideoConfig) {
         verseNumber: v.verse_number,
         verseKey: v.verse_key,
         words: v.words,
-        timing: timing
+        timing: customTiming
           ? {
-              verse_key: timing.verse_key,
-              timestamp_from: timing.timestamp_from,
-              timestamp_to: timing.timestamp_to,
-              duration: timing.duration,
-              segments: timing.segments,
+              verse_key: verseKey,
+              timestamp_from: customTiming.startMs,
+              timestamp_to: customTiming.endMs,
+              duration: customTiming.endMs - customTiming.startMs,
+              segments: [],
             }
-          : undefined,
+          : timing
+            ? {
+                verse_key: timing.verse_key,
+                timestamp_from: timing.timestamp_from,
+                timestamp_to: timing.timestamp_to,
+                duration: timing.duration,
+                segments: timing.segments,
+              }
+            : undefined,
       };
     });
 
     setVerses(processedVerses);
-  }, [fullTextData, fullAudioData, config.verseStart, config.verseEnd]);
+  }, [
+    fullTextData,
+    fullAudioData,
+    config.verseStart,
+    config.verseEnd,
+    config.audioSource,
+    config.customAudioUrl,
+    config.customVerseTimings,
+  ]);
 
   return {
     verses,
