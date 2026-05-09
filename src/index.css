@@ -101,3 +101,234 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-studio-textMuted);
 }
+
+.custom-audio-player-shell {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}
+
+.custom-audio-player-shell .rmap-player-provider,
+.custom-audio-player-shell .rmap-player-container,
+.custom-audio-player-shell .rmap-interface-container,
+.custom-audio-player-shell .rmap-interface-grid,
+.custom-audio-player-shell .rmap-dropdown-container {
+  overflow: visible !important;
+}
+
+.custom-audio-player-shell .rmap-player-provider {
+  --rm-audio-player-text-color: #f4f4f5;
+  --rm-audio-player-shadow: 0 0 0;
+  --rm-audio-player-interface-container: transparent;
+  --rm-audio-player-volume-background: #27272a;
+  --rm-audio-player-volume-panel-background: #18181b;
+  --rm-audio-player-volume-panel-border: rgba(255, 255, 255, 0.1);
+  --rm-audio-player-volume-thumb: #f4f4f5;
+  --rm-audio-player-volume-fill: #a3004c;
+  --rm-audio-player-volume-track: #3f3f46;
+  --rm-audio-player-track-current-time: #f4f4f5;
+  --rm-audio-player-track-duration: #71717a;
+  --rm-audio-player-progress-bar: #a3004c;
+  --rm-audio-player-progress-bar-background: #27272a;
+  background: transparent;
+  border: 0;
+  color: #f4f4f5;
+  width: 100%;
+}
+
+/* ── GRID: play left | current | progress | duration | volume right ── */
+.custom-audio-player-shell .rmap-interface-container .rmap-interface-grid {
+  grid-template-areas:
+    "track   track    track    track"
+    "play    current  progress duration" !important;
+  grid-template-columns: auto auto 1fr auto !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  gap: 6px 12px;
+  min-height: 74px !important;
+  padding: 12px 14px !important;
+  background: transparent !important;
+}
+
+/* Track info — full top row */
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-2"] {
+  grid-area: track !important;
+  justify-self: stretch !important;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+/* Current time */
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-3"] {
+  grid-area: current !important;
+  justify-self: start !important;
+  padding: 0 !important;
+}
+
+/* Duration */
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-4"] {
+  grid-area: duration !important;
+  justify-self: end !important;
+  padding: 0 !important;
+}
+
+/* Progress bar */
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-5"] {
+  grid-area: progress !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* Volume — move into track row on the far right */
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-7"] {
+  grid-area: track !important;
+  justify-self: end !important;
+  align-self: center !important;
+  padding: 0 !important;
+  position: relative !important; /* anchor for the volume panel popup */
+  isolation: isolate;
+  z-index: 40;
+}
+
+/* Play button — far LEFT of controls row */
+.custom-audio-player-shell .rmap-interface-grid > [style*="row1-8"] {
+  grid-area: play !important;
+  justify-self: start !important;
+  padding: 0 !important;
+}
+
+/* ── Track info ── */
+.custom-audio-player-shell .rmap-track-info-container {
+  min-width: 0;
+  row-gap: 2px;
+}
+
+.custom-audio-player-shell .rmap-track-info-container .title {
+  max-width: calc(100% - 60px); /* leave room for volume btn */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f4f4f5;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.custom-audio-player-shell .rmap-track-info-container .writer {
+  color: #a1a1aa;
+  font-size: 12px;
+}
+
+/* ── Time labels ── */
+.custom-audio-player-shell .rmap-track-time-container {
+  min-height: auto;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.custom-audio-player-shell .rmap-track-time-current .rmap-track-current-time,
+.custom-audio-player-shell .rmap-track-time-duration .rmap-track-duration {
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Progress bar ── */
+.custom-audio-player-shell .rmap-progress-container {
+  min-width: 0;
+  width: 100%;
+}
+
+.custom-audio-player-shell .rmap-bar-progress-wrapper {
+  height: 16px;
+}
+
+.custom-audio-player-shell .rmap-bar-progress-wrapper .rmap-progress-bar {
+  height: 4px;
+  border-radius: 999px;
+}
+
+.custom-audio-player-shell .rmap-bar-progress-wrapper .rmap-progress-fill {
+  border-radius: 999px;
+}
+
+/* ── Play button ── */
+.custom-audio-player-shell .rmap-ctrl-btn-wrapper {
+  height: 38px;
+}
+
+.custom-audio-player-shell .styled-btn {
+  height: 32px;
+  color: #f4f4f5;
+}
+
+.custom-audio-player-shell .styled-btn.rmap-play-btn {
+  width: 38px;
+}
+
+.custom-audio-player-shell button {
+  border-radius: 999px;
+}
+
+.custom-audio-player-shell .rmap-dropdown-container {
+  position: relative !important;
+}
+
+.custom-audio-player-shell .rmap-dropdown-content {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 10px) !important;
+  top: auto !important;
+  left: auto !important;
+  z-index: 60 !important;
+  transform-origin: center bottom !important;
+}
+
+.custom-audio-player-shell .rmap-volume-container {
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+/* ── Duration: breathing room before the number ── */
+.custom-audio-player-shell
+  .rmap-interface-grid
+  > [style*="row1-4"]
+  .rmap-track-duration,
+.custom-audio-player-shell .rmap-track-time-duration {
+  padding-left: 10px !important;
+}
+
+/* ── Volume panel: pop UP above the button ── */
+/*
+  The library renders the panel as a sibling or child of the volume wrapper.
+  We anchor on the wrapper (position:relative above) and force the panel up.
+  Covers both common library structures: direct child or via a portal sibling.
+*/
+.custom-audio-player-shell .rmap-volume-panel,
+.custom-audio-player-shell [class*="volume-panel"],
+.custom-audio-player-shell [class*="volumePanel"] {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 6px) !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 9999 !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #18181b !important;
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+  overflow: hidden;
+}
+
+/* Prevent the panel from inheriting any top/transform set by the library */
+.custom-audio-player-shell .rmap-volume-panel[style],
+.custom-audio-player-shell [class*="volume-panel"][style],
+.custom-audio-player-shell [class*="volumePanel"][style] {
+  top: auto !important;
+  transform: none !important;
+}

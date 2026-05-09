@@ -2,6 +2,8 @@
 
 Quran Studio is a web and desktop-ready editor for creating Quran recitation videos. It combines Quran text, translations, timed recitation audio, typography controls, and visual backgrounds into an exportable MP4 canvas workflow.
 
+Created with thanks for this work: https://github.com/quran8vs/Quran-Video-Studio
+
 The app is built with React, Vite, TypeScript, Tailwind CSS, Bun, and Tauri.
 
 ## Features

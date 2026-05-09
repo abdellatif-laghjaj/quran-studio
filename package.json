@@ -27,7 +27,8 @@
     "lucide-react": "^0.263.1",
     "mp4-muxer": "^5.2.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-modern-audio-player": "^2.3.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.1",

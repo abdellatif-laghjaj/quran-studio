@@ -2,7 +2,12 @@ export interface VideoConfig {
   surahId: number;
   verseStart: number;
   verseEnd: number;
+  audioSource: "reciter" | "custom";
   reciterId: number | string;
+  customAudioUrl: string | null;
+  customAudioName: string | null;
+  customAudioDurationMs: number | null;
+  customVerseTimings: Record<string, { startMs: number; endMs: number }>;
   fontFamily: string;
   fontSize: number;
   wordSpacing: number;
