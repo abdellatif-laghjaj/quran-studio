@@ -472,6 +472,10 @@ export default function CustomAudioStudio({
                     playbackRate: false,
                     progress: "bar",
                   }}
+                  placement={{
+                    player: "static",
+                    volumeSlider: "top",
+                  }}
                   audioInitialState={{
                     curPlayId: 1,
                     volume: 1,

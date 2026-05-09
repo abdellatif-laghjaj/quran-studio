@@ -102,6 +102,20 @@
   background: var(--color-studio-textMuted);
 }
 
+.custom-audio-player-shell {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}
+
+.custom-audio-player-shell .rmap-player-provider,
+.custom-audio-player-shell .rmap-player-container,
+.custom-audio-player-shell .rmap-interface-container,
+.custom-audio-player-shell .rmap-interface-grid,
+.custom-audio-player-shell .rmap-dropdown-container {
+  overflow: visible !important;
+}
+
 .custom-audio-player-shell .rmap-player-provider {
   --rm-audio-player-text-color: #f4f4f5;
   --rm-audio-player-shadow: 0 0 0;
@@ -174,6 +188,7 @@
   padding: 0 !important;
   position: relative !important; /* anchor for the volume panel popup */
   isolation: isolate;
+  z-index: 40;
 }
 
 /* Play button — far LEFT of controls row */
@@ -252,6 +267,28 @@
 
 .custom-audio-player-shell button {
   border-radius: 999px;
+}
+
+.custom-audio-player-shell .rmap-dropdown-container {
+  position: relative !important;
+}
+
+.custom-audio-player-shell .rmap-dropdown-content {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 10px) !important;
+  top: auto !important;
+  left: auto !important;
+  z-index: 60 !important;
+  transform-origin: center bottom !important;
+}
+
+.custom-audio-player-shell .rmap-volume-container {
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
 }
 
 /* ── Duration: breathing room before the number ── */
