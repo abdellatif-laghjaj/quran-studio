@@ -68,7 +68,7 @@ export default function App() {
   const [isSurahOpen, setIsSurahOpen] = useState(false);
   const [surahSearch, setSurahSearch] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
+
   // Random background callback
   const randomBackgroundRef = useRef<(() => void) | null>(null);
   const handleRandomBackground = (callback: () => void) => {

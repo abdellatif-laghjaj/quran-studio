@@ -28,7 +28,11 @@ interface SidebarStyleProps {
   onRandomBackground?: (callback: () => void) => void;
 }
 
-export default function SidebarStyle({ config, setConfig, onRandomBackground }: SidebarStyleProps) {
+export default function SidebarStyle({
+  config,
+  setConfig,
+  onRandomBackground,
+}: SidebarStyleProps) {
   const [imageQuery, setImageQuery] = useState("nature");
   const [videoQuery, setVideoQuery] = useState("ocean");
   const [images, setImages] = useState<PixabayImageResult[]>([]);

@@ -40,7 +40,11 @@ export default function RightSidebar({
           setTypoTab={setTypoTab}
         />
 
-        <SidebarStyle config={config} setConfig={setConfig} onRandomBackground={onRandomBackground} />
+        <SidebarStyle
+          config={config}
+          setConfig={setConfig}
+          onRandomBackground={onRandomBackground}
+        />
       </div>
     </div>
   );

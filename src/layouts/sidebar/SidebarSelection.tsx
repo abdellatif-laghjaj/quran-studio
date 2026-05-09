@@ -161,6 +161,7 @@ export default function SidebarSelection({
       eligibleSurahs[Math.floor(Math.random() * eligibleSurahs.length)];
     const maxStart = Math.max(1, randomSurah.totalAyahs - 6);
     const verseStart = Math.floor(Math.random() * maxStart) + 1;
+    const randomReciter = RECITERS[Math.floor(Math.random() * RECITERS.length)];
 
     setConfig((previousConfig) => {
       const nextConfig = {
@@ -168,6 +169,7 @@ export default function SidebarSelection({
         surahId: randomSurah.number,
         verseStart,
         verseEnd: verseStart + 6,
+        reciterId: randomReciter.id,
       };
 
       if (
@@ -181,7 +183,7 @@ export default function SidebarSelection({
     });
     setIsSurahOpen(false);
     setSurahSearch("");
-    
+
     // Trigger random background selection
     if (onRandomBackground) {
       onRandomBackground();
