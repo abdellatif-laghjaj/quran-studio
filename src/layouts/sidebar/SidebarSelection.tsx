@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, ChevronDown, Check } from "lucide-react";
+import { Search, ChevronDown, Check, Shuffle } from "lucide-react";
 import { VideoConfig } from "../../features/video-editor/types";
 import { Surah } from "../../features/quran/types";
+import { SURAHS } from "../../features/quran/data/surahs";
 
 import { AL_QADR_FONT } from "../../shared/constants";
 
@@ -151,13 +152,51 @@ export default function SidebarSelection({
   surahSearch,
   setSurahSearch,
 }: SidebarSelectionProps) {
+  const pickRandomSevenVerseRange = () => {
+    const eligibleSurahs = SURAHS.filter((s) => s.totalAyahs >= 7);
+    const randomSurah =
+      eligibleSurahs[Math.floor(Math.random() * eligibleSurahs.length)];
+    const maxStart = Math.max(1, randomSurah.totalAyahs - 6);
+    const verseStart = Math.floor(Math.random() * maxStart) + 1;
+
+    setConfig((previousConfig) => {
+      const nextConfig = {
+        ...previousConfig,
+        surahId: randomSurah.number,
+        verseStart,
+        verseEnd: verseStart + 6,
+      };
+
+      if (
+        randomSurah.number !== 97 &&
+        previousConfig.fontFamily === AL_QADR_FONT.family
+      ) {
+        nextConfig.fontFamily = "v2";
+      }
+
+      return nextConfig;
+    });
+    setIsSurahOpen(false);
+    setSurahSearch("");
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <span className="w-1 h-4 bg-studio-accent rounded-full shadow-[0_0_10px_rgba(44,164,171,0.5)]"></span>
-        <h2 className="text-xs font-bold text-studio-textMuted uppercase tracking-wider">
-          Selection
-        </h2>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="w-1 h-4 bg-studio-accent rounded-full shadow-[0_0_10px_rgba(44,164,171,0.5)]"></span>
+          <h2 className="text-xs font-bold text-studio-textMuted uppercase tracking-wider">
+            Selection
+          </h2>
+        </div>
+        <button
+          onClick={pickRandomSevenVerseRange}
+          className="h-8 w-8 flex items-center justify-center rounded-lg border border-white/5 bg-white/[0.03] text-zinc-500 transition-all hover:border-studio-accent/40 hover:bg-studio-accent/10 hover:text-studio-accent active:scale-95"
+          title="Pick a random surah and 7-ayah range"
+          aria-label="Pick a random surah and 7-ayah range"
+        >
+          <Shuffle className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="space-y-3">
