@@ -694,6 +694,7 @@ function LiveAudioVisualizer({
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     };
 
+    // Idle: flat uniform bars with very subtle breathing
     const drawIdle = (time = 0) => {
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
@@ -704,13 +705,19 @@ function LiveAudioVisualizer({
       const barCount = 54;
       const gap = 4;
       const barWidth = Math.max(3, (width - gap * (barCount - 1)) / barCount);
+      const baseH = 6;
+
       for (let i = 0; i < barCount; i++) {
-        const wave = Math.sin(time / 420 + i * 0.42);
-        const barHeight = 10 + Math.abs(wave) * 12;
+        // Very gentle sine-based breathing — all bars same neutral height
+        const breath = Math.sin(time / 1200 + i * 0.18) * 0.5 + 0.5; // 0..1
+        const barHeight = baseH + breath * 6; // 6..12 px — subtle
         const x = i * (barWidth + gap);
         const y = (height - barHeight) / 2;
-        ctx.fillStyle = "rgba(163, 0, 76, 0.38)";
-        ctx.fillRect(x, y, barWidth, barHeight);
+
+        ctx.fillStyle = "rgba(163, 0, 76, 0.30)";
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth, barHeight, 2);
+        ctx.fill();
       }
     };
 
@@ -723,6 +730,7 @@ function LiveAudioVisualizer({
       ctx.fillRect(0, 0, width, height);
       onClock(Math.round(audio.currentTime * 1000));
 
+      // If paused or analyser not ready, draw idle
       if (!hasAnalyser || !analyser || audio.paused) {
         drawIdle(performance.now());
         animationFrame = requestAnimationFrame(drawLive);
@@ -736,32 +744,39 @@ function LiveAudioVisualizer({
       const gap = 3;
       const barWidth = Math.max(3, (width - gap * (barCount - 1)) / barCount);
 
+      // No shadow, no glow
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "transparent";
+
       for (let i = 0; i < barCount; i++) {
+        // Map bar index to frequency range (focus on 0..72% of bins — covers speech/vocal range)
         const start = Math.floor((i / barCount) * data.length * 0.72);
         const end = Math.floor(((i + 1) / barCount) * data.length * 0.72);
         let sum = 0;
         for (let j = start; j <= end; j++) sum += data[j] || 0;
-        const value = sum / Math.max(1, end - start + 1);
-        const normalized = Math.pow(value / 255, 0.72);
-        const barHeight = Math.max(6, normalized * (height - 18));
+        const avg = sum / Math.max(1, end - start + 1);
+
+        // Gamma-correct to make quiet parts more visible
+        const normalized = Math.pow(avg / 255, 0.65);
+        const barHeight = Math.max(4, normalized * (height - 16));
         const x = i * (barWidth + gap);
         const y = (height - barHeight) / 2;
-        const glow = normalized > 0.48 ? 14 : 0;
 
-        ctx.shadowColor = "rgba(244, 244, 245, 0.55)";
-        ctx.shadowBlur = glow;
-        ctx.fillStyle = i % 5 === 0 ? "#f4f4f5" : "#a3004c";
-        ctx.fillRect(x, y, barWidth, barHeight);
+        // Uniform accent color — full opacity when loud, dimmed when quiet
+        const alpha = 0.35 + normalized * 0.65; // 0.35..1.0
+        ctx.fillStyle = `rgba(163, 0, 76, ${alpha.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth, barHeight, 2);
+        ctx.fill();
       }
 
-      ctx.shadowBlur = 0;
       animationFrame = requestAnimationFrame(drawLive);
     };
 
     const handlePlay = () => {
       setupAnalyser()
-        .catch((error) => {
-          console.warn("Live audio visualizer unavailable:", error);
+        .catch((err) => {
+          console.warn("Live audio visualizer unavailable:", err);
         })
         .finally(() => {
           cancelAnimationFrame(animationFrame);

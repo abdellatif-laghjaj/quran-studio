@@ -122,19 +122,21 @@
   width: 100%;
 }
 
+/* ── GRID: play left | current | progress | duration | volume right ── */
 .custom-audio-player-shell .rmap-interface-container .rmap-interface-grid {
   grid-template-areas:
-    "track track play volume"
-    "current progress progress duration" !important;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 2fr) auto auto !important;
+    "track   track    track    track"
+    "play    current  progress duration" !important;
+  grid-template-columns: auto auto 1fr auto !important;
   grid-template-rows: auto auto !important;
   align-items: center !important;
-  gap: 10px 14px;
+  gap: 6px 12px;
   min-height: 74px !important;
   padding: 12px 14px !important;
   background: transparent !important;
 }
 
+/* Track info — full top row */
 .custom-audio-player-shell .rmap-interface-grid > [style*="row1-2"] {
   grid-area: track !important;
   justify-self: stretch !important;
@@ -142,18 +144,21 @@
   padding: 0 !important;
 }
 
+/* Current time */
 .custom-audio-player-shell .rmap-interface-grid > [style*="row1-3"] {
   grid-area: current !important;
   justify-self: start !important;
   padding: 0 !important;
 }
 
+/* Duration */
 .custom-audio-player-shell .rmap-interface-grid > [style*="row1-4"] {
   grid-area: duration !important;
   justify-self: end !important;
   padding: 0 !important;
 }
 
+/* Progress bar */
 .custom-audio-player-shell .rmap-interface-grid > [style*="row1-5"] {
   grid-area: progress !important;
   justify-self: stretch !important;
@@ -161,25 +166,31 @@
   padding: 0 !important;
 }
 
+/* Volume — move into track row on the far right */
 .custom-audio-player-shell .rmap-interface-grid > [style*="row1-7"] {
-  grid-area: volume !important;
+  grid-area: track !important;
   justify-self: end !important;
+  align-self: center !important;
   padding: 0 !important;
+  position: relative !important; /* anchor for the volume panel popup */
+  isolation: isolate;
 }
 
+/* Play button — far LEFT of controls row */
 .custom-audio-player-shell .rmap-interface-grid > [style*="row1-8"] {
   grid-area: play !important;
-  justify-self: end !important;
+  justify-self: start !important;
   padding: 0 !important;
 }
 
+/* ── Track info ── */
 .custom-audio-player-shell .rmap-track-info-container {
   min-width: 0;
-  row-gap: 4px;
+  row-gap: 2px;
 }
 
 .custom-audio-player-shell .rmap-track-info-container .title {
-  max-width: 100%;
+  max-width: calc(100% - 60px); /* leave room for volume btn */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -193,16 +204,20 @@
   font-size: 12px;
 }
 
+/* ── Time labels ── */
 .custom-audio-player-shell .rmap-track-time-container {
   min-height: auto;
   font-size: 12px !important;
+  font-variant-numeric: tabular-nums;
 }
 
 .custom-audio-player-shell .rmap-track-time-current .rmap-track-current-time,
 .custom-audio-player-shell .rmap-track-time-duration .rmap-track-duration {
   letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
 }
 
+/* ── Progress bar ── */
 .custom-audio-player-shell .rmap-progress-container {
   min-width: 0;
   width: 100%;
@@ -221,6 +236,7 @@
   border-radius: 999px;
 }
 
+/* ── Play button ── */
 .custom-audio-player-shell .rmap-ctrl-btn-wrapper {
   height: 38px;
 }
@@ -236,4 +252,46 @@
 
 .custom-audio-player-shell button {
   border-radius: 999px;
+}
+
+/* ── Duration: breathing room before the number ── */
+.custom-audio-player-shell
+  .rmap-interface-grid
+  > [style*="row1-4"]
+  .rmap-track-duration,
+.custom-audio-player-shell .rmap-track-time-duration {
+  padding-left: 10px !important;
+}
+
+/* ── Volume panel: pop UP above the button ── */
+/*
+  The library renders the panel as a sibling or child of the volume wrapper.
+  We anchor on the wrapper (position:relative above) and force the panel up.
+  Covers both common library structures: direct child or via a portal sibling.
+*/
+.custom-audio-player-shell .rmap-volume-panel,
+.custom-audio-player-shell [class*="volume-panel"],
+.custom-audio-player-shell [class*="volumePanel"] {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 6px) !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 9999 !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #18181b !important;
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+  overflow: hidden;
+}
+
+/* Prevent the panel from inheriting any top/transform set by the library */
+.custom-audio-player-shell .rmap-volume-panel[style],
+.custom-audio-player-shell [class*="volume-panel"][style],
+.custom-audio-player-shell [class*="volumePanel"][style] {
+  top: auto !important;
+  transform: none !important;
 }
